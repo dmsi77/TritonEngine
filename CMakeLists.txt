@@ -6,8 +6,8 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 add_subdirectory(engine)
-add_subdirectory(samples/Editor)
-#add_subdirectory(samples/Sample01)
+#add_subdirectory(samples/Editor)
+add_subdirectory(samples/Sample01)
 
 if (MSVC)
     add_compile_options(RealWare PUBLIC /O2 /EHsc)

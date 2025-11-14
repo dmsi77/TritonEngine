@@ -67,7 +67,7 @@ public:
             0,
             255
         };
-        sTextureAtlasTexture* customRenderPassTexture1 = texture->AddTexture(
+        sTextureAtlasTexture* customRenderPassTexture1 = texture->CreateTexture(
             "CustomRenderPassTexture1",
             glm::vec2(2, 2),
             4,
@@ -94,7 +94,7 @@ public:
             255,
             255
         };
-        sTextureAtlasTexture* customRenderPassTexture2 = texture->AddTexture(
+        sTextureAtlasTexture* customRenderPassTexture2 = texture->CreateTexture(
             "CustomRenderPassTexture2",
             glm::vec2(2, 2),
             4,
@@ -114,20 +114,20 @@ public:
         renderPassDesc.InputVertexFormat = Category::VERTEX_BUFFER_FORMAT_POS_TEX_NRM_VEC3_VEC2_VEC3;
         renderPassDesc.InputBuffers.emplace_back(render->GetVertexBuffer());
         renderPassDesc.InputBuffers.emplace_back(render->GetIndexBuffer());
-        renderPassDesc.InputBuffers.emplace_back(render->GetTransparentInstanceBuffer());
-        renderPassDesc.InputBuffers.emplace_back(render->GetTransparentMaterialBuffer());
+        renderPassDesc.InputBuffers.emplace_back(render->GetOpaqueInstanceBuffer());
+        renderPassDesc.InputBuffers.emplace_back(render->GetOpaqueMaterialBuffer());
         renderPassDesc.InputBuffers.emplace_back(render->GetLightBuffer());
-        renderPassDesc.InputBuffers.emplace_back(render->GetTransparentTextureAtlasTexturesBuffer());
+        renderPassDesc.InputBuffers.emplace_back(render->GetOpaqueTextureAtlasTexturesBuffer());
         renderPassDesc.InputTextures.emplace_back(GetTextureManager()->GetAtlas());
         renderPassDesc.InputTextureNames.emplace_back("TextureAtlas");
         renderPassDesc.InputTextureAtlasTextures.emplace_back(customRenderPassTexture1);
         renderPassDesc.InputTextureAtlasTextures.emplace_back(customRenderPassTexture2);
         renderPassDesc.InputTextureAtlasTextureNames.emplace_back("MyRedTexture");
         renderPassDesc.InputTextureAtlasTextureNames.emplace_back("MyWhiteTexture");
-        renderPassDesc.ShaderBase = transparentRenderPass->Desc.Shader;
+        renderPassDesc.ShaderBase = opaqueRenderPass->Desc.Shader;
         renderPassDesc.ShaderVertexFunc = vertexFunc;
         renderPassDesc.ShaderFragmentFunc = fragmentFunc;
-        renderPassDesc.RenderTarget = transparentRenderPass->Desc.RenderTarget;
+        renderPassDesc.RenderTarget = opaqueRenderPass->Desc.RenderTarget;
         renderPassDesc.Viewport = glm::vec4(0.0f, 0.0f, windowSize.x, windowSize.y);
         renderPassDesc.DepthMode.UseDepthTest = K_TRUE;
         renderPassDesc.DepthMode.UseDepthWrite = K_TRUE;
@@ -172,23 +172,23 @@ public:
         );
 
         // Textures
-        sTextureAtlasTexture* texture1 = _texture->AddTexture(
+        sTextureAtlasTexture* texture1 = _texture->CreateTexture(
             "Texture1",
             "C:/DDD/RealWare/resources/texture1.png"
         );
-        sTextureAtlasTexture* texture2 = _texture->AddTexture(
+        sTextureAtlasTexture* texture2 = _texture->CreateTexture(
             "Texture2",
             "C:/DDD/RealWare/resources/texture2.png"
         );
 
         // Materials
-        sMaterial* material1 = _render->AddMaterial(
+        sMaterial* material1 = _render->CreateMaterial(
             "Material1",
             texture1,
             glm::vec4(0.0f, 1.0f, 0.0f, 1.0f),
             glm::vec4(1.0f)
         );
-        sMaterial* material2 = _render->AddMaterial(
+        sMaterial* material2 = _render->CreateMaterial(
             "Material2",
             texture2,
             glm::vec4(1.0f, 0.0f, 0.0f, 0.5f),
@@ -200,8 +200,8 @@ public:
         sText* text = _font->CreateText(font, "New line\ntest\nanother newline\there");
 
         // Physics
-        sSimulationScene* pxScene = _physics->AddScene("PXScene1");
-        sSubstance* pxSubstance = _physics->AddSubstance("PXSubstance1");
+        sSimulationScene* pxScene = _physics->CreateScene("PXScene1");
+        sSubstance* pxSubstance = _physics->CreateSubstance("PXSubstance1");
 
         // Game objects
         const usize N = 1;
@@ -214,9 +214,9 @@ public:
                     const glm::vec3 position = glm::vec3(x, y, z);
                     const std::string id = "Cube" + std::to_string(x) + std::to_string(y) + std::to_string(z);
 
-                    cGameObject* cubeObject1 = _gameObject->AddGameObject(id);
+                    cGameObject* cubeObject1 = _gameObject->CreateGameObject(id);
                     cubeObject1->SetVisible(K_TRUE);
-                    cubeObject1->SetOpaque(K_FALSE);
+                    cubeObject1->SetOpaque(K_TRUE);
                     cubeObject1->SetGeometry(_cubeGeometry);
                     cubeObject1->SetPosition(position);
                     cubeObject1->SetScale(glm::vec3(1.0f));
@@ -225,7 +225,7 @@ public:
             }
         }
 
-        cGameObject* textObject = _gameObject->AddGameObject("TextObject");
+        cGameObject* textObject = _gameObject->CreateGameObject("TextObject");
         textObject->SetVisible(K_TRUE);
         textObject->SetOpaque(K_TRUE);
         textObject->SetPosition(glm::vec3(0.5f, 0.5f, 0.0f));
@@ -251,11 +251,11 @@ public:
         _transparentGameObjects = new std::vector<cGameObject>();
         for (auto& gameObject : gameObjects.GetObjects())
         {
-            if (gameObject.GetOpaque() == K_FALSE)
+            if (gameObject.GetOpaque() == K_TRUE)
                 _transparentGameObjects->push_back(gameObject);
         }
         const auto& transparentGameObjectsRef = *_transparentGameObjects;
-        _render->WriteObjectsToTransparentBuffers(transparentGameObjectsRef, _customRenderPass);
+        _render->WriteObjectsToOpaqueBuffers(transparentGameObjectsRef, _customRenderPass);
 
         _textGameObjects = new std::vector<cGameObject>();
         _textGameObjects->push_back(*textObject);
@@ -269,9 +269,8 @@ public:
         // Rendering
         cGameObject* cameraObject = _cameraGameObject;
         _render->ClearRenderPasses(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), 1.0f);
-        _render->DrawGeometryTransparent(
+        _render->DrawGeometryOpaque(
             _cubeGeometry,
-            *_transparentGameObjects,
             _cameraGameObject,
             _customRenderPass
         );

@@ -574,7 +574,7 @@ namespace realware
             _context->WriteBuffer(_transparentTextureAtlasTexturesBuffer, 0, _transparentTextureAtlasTexturesByteSize, _transparentTextureAtlasTextures);
         }
 
-        void mRender::DrawGeometryOpaque(const sVertexBufferGeometry* const geometry, const std::vector<cGameObject>& objects, const cGameObject* const cameraObject, sRenderPass* const renderPass)
+        void mRender::DrawGeometryOpaque(const sVertexBufferGeometry* const geometry, const cGameObject* const cameraObject, sRenderPass* const renderPass)
         {
             if (renderPass == nullptr)
             {
