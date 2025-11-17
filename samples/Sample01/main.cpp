@@ -16,6 +16,7 @@
 #include "../../engine/src/filesystem_manager.hpp"
 #include "../../engine/src/physics_manager.hpp"
 #include "../../engine/src/gameobject_manager.hpp"
+#include "../../engine/src/event_manager.hpp"
 #include "../../engine/src/memory_pool.hpp"
 
 using namespace realware::app;
@@ -205,7 +206,7 @@ public:
         sSubstance* pxSubstance = _physics->CreateSubstance("PXSubstance1");
 
         // Game objects
-        const usize N = 50;
+        const usize N = 1;
         for (usize z = 0; z < N; z++)
         {
             for (usize y = 0; y < N; y++)
@@ -233,6 +234,14 @@ public:
         textObject->SetScale(glm::vec3(1.0f));
         textObject->SetMaterial(material1);
         textObject->SetText(text);
+        
+        GetEventManager()->Subscribe(
+            textObject,
+            cEvent(eEventType::KEY_PRESS, [](sEventData* const data) { std::cout << "Key press!" << std::endl; })
+        );
+        GetEventManager()->Send(
+            eEventType::KEY_PRESS
+        );
 
         // Create camera
         _camera->CreateCamera();

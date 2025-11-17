@@ -51,6 +51,7 @@ namespace realware
     namespace utils
     {
         class cMemoryPool;
+        class mEventManager;
     }
 
     namespace app
@@ -119,6 +120,7 @@ namespace realware
             inline fs::mFileSystem* GetFileSystemManager() const { return _fileSystem; }
             inline physics::mPhysics* GetPhysicsManager() const { return _physics; }
             inline game::mGameObject* GetGameObjectManager() const { return _gameObject; }
+            inline utils::mEventManager* GetEventManager() const { return _event; }
             inline utils::cMemoryPool* GetMemoryPool() const { return _memoryPool; }
             inline void* GetWindow() const { return _window; }
             inline glm::vec2 GetWindowSize() const { return glm::vec2(_desc.WindowDesc.Width, _desc.WindowDesc.Height); }
@@ -169,6 +171,7 @@ namespace realware
             fs::mFileSystem* _fileSystem = nullptr;
             physics::mPhysics* _physics = nullptr;
             game::mGameObject* _gameObject = nullptr;
+            utils::mEventManager* _event = nullptr;
             utils::cMemoryPool* _memoryPool = nullptr;
             types::s32 _keys[K_MAX_KEY_COUNT] = {};
             types::s32 _mouseKeys[3] = {};
