@@ -6,6 +6,8 @@ Lightweight C++11 game engine
 - File IO
 - TTF fonts
 - Memory pool
+- Thread pool
+- Event manager
 - PhysX physics
 - Assimp model loading
 - OpenGL rendering backend
