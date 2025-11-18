@@ -15,6 +15,7 @@
 #include "texture_manager.hpp"
 #include "memory_pool.hpp"
 #include "event_manager.hpp"
+#include "thread_pool.hpp"
 #include "log.hpp"
 
 using namespace types;
@@ -191,7 +192,8 @@ namespace realware
             mSound* pSound = (mSound*)_memoryPool->Allocate(sizeof(mSound));
             mPhysics* pPhysics = (mPhysics*)_memoryPool->Allocate(sizeof(mPhysics));
             mGameObject* pGameObject = (mGameObject*)_memoryPool->Allocate(sizeof(mGameObject));
-            mEventManager* pEventManager = (mEventManager*)_memoryPool->Allocate(sizeof(mEventManager));
+            mEvent* pEvent = (mEvent*)_memoryPool->Allocate(sizeof(mEvent));
+            mThread* pThread = (mThread*)_memoryPool->Allocate(sizeof(mThread));
 
             _camera = new (pCamera) mCamera(this);
             _texture = new (pTexture) mTexture(this, _renderContext);
@@ -201,7 +203,8 @@ namespace realware
             _sound = new (pSound) mSound(this, _soundContext);
             _physics = new (pPhysics) mPhysics(this);
             _gameObject = new (pGameObject) mGameObject(this);
-            _event = new (pEventManager) mEventManager(this);
+            _event = new (pEvent) mEvent(this);
+            _thread = new (pThread) mThread(this);
         }
 
         void cApplication::DestroyMemoryPool()
