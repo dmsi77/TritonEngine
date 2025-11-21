@@ -2,13 +2,14 @@
 
 #pragma once
 
+#include "object.hpp"
 #include "types.hpp"
 
 namespace realware
 {
     namespace utils
     {
-        class cBuffer
+        class cBuffer : public cObject
         {
         public:
             explicit cBuffer() = default;
