@@ -25,6 +25,13 @@ namespace realware
         void* Allocate(types::usize size);
         bool Free(void* address);
 
+        template <typename T>
+        T* New(types::usize size)
+        {
+            T* ptr = (T*)Allocate(sizeof(T));
+            return new (ptr) T(this);
+        }
+
         inline types::usize GetAllocCount() const { return _allocs.size(); }
         inline types::usize GetByteSize() const { return _byteSize; }
         inline types::usize GetBytesUsed() const { return _bytesOccupied - _bytesFreed; }
