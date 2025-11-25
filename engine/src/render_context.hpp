@@ -140,9 +140,10 @@ namespace realware
         sDescriptor _desc;
     };
 
-    class iRenderContext : public cObject
+    class iRenderContext : public iObject
     {
     public:
+        explicit iRenderContext(cContext* context) : iObject(context) {}
         virtual ~iRenderContext() = default;
 
         virtual sBuffer* CreateBuffer(types::usize byteSize, sBuffer::eType type, const void* data) = 0;
@@ -199,8 +200,10 @@ namespace realware
     class cOpenGLRenderContext : public iRenderContext
     {
     public:
-        cOpenGLRenderContext(cApplication* app);
+        cOpenGLRenderContext(cContext* context);
         virtual ~cOpenGLRenderContext() override final;
+
+        inline virtual cType GetType() const override final { return cType("OpenGLRenderContext"); }
 
         virtual sBuffer* CreateBuffer(types::usize byteSize, sBuffer::eType type, const void* data) override final;
         virtual void BindBuffer(const sBuffer* buffer) override final;
@@ -251,8 +254,5 @@ namespace realware
         virtual void Draw(types::usize indexCount, types::usize vertexOffset, types::usize indexOffset, types::usize instanceCount) override final;
         virtual void DrawQuad() override final;
         virtual void DrawQuads(types::usize count) override final;
-
-    private:
-        cApplication* _app = nullptr;
     };
 }

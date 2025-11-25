@@ -82,12 +82,13 @@ namespace realware
         glm::mat4 _world = glm::mat4(1.0f);
     };
 
-    class cMaterial : public cIdVecObject
+    class cMaterial : public cFactoryObject
     {
     public:
-        explicit cMaterial(const std::string& id, cApplication* app, cTextureAtlasTexture* diffuseTexture, const glm::vec4& diffuseColor, const glm::vec4& highlightColor, sShader* customShader)
-            : cIdVecObject(id, app), _diffuseTexture(diffuseTexture), _diffuseColor(diffuseColor), _highlightColor(highlightColor), _customShader(customShader) {}
+        explicit cMaterial(cContext* context, cTextureAtlasTexture* diffuseTexture, const glm::vec4& diffuseColor, const glm::vec4& highlightColor, sShader* customShader) : cFactoryObject(context), _diffuseTexture(diffuseTexture), _diffuseColor(diffuseColor), _highlightColor(highlightColor), _customShader(customShader) {}
         ~cMaterial() = default;
+
+        inline virtual cType GetType() const override { return cType("Material"); }
 
         inline sShader* GetCustomShader() const { return _customShader; }
         inline cTextureAtlasTexture* GetDiffuseTexture() const { return _diffuseTexture; }
@@ -143,11 +144,13 @@ namespace realware
         glm::vec4 _attenuation = glm::vec4(0.0f);
     };
 
-    class mRender : public cObject
+    class mRender : public iObject
     {
     public:
-        explicit mRender(cApplication* app, iRenderContext* context);
+        explicit mRender(cContext* context, iRenderContext* renderContext);
         ~mRender();
+
+        inline virtual cType GetType() const override final { return cType("RenderManager"); }
 
         cMaterial* CreateMaterial(const std::string& id, cTextureAtlasTexture* diffuseTexture, const glm::vec4& diffuseColor, const glm::vec4& highlightColor, eCategory customShaderRenderPath = eCategory::RENDER_PATH_OPAQUE, const std::string& customVertexFuncPath = "", const std::string& customFragmentFuncPath = "");
         cMaterial* FindMaterial(const std::string& id);
@@ -162,8 +165,8 @@ namespace realware
             
         void UpdateLights();
 
-        void WriteObjectsToOpaqueBuffers(cIdVec<cGameObject>& objects, sRenderPass* renderPass);
-        void WriteObjectsToTransparentBuffers(cIdVec<cGameObject>& objects, sRenderPass* renderPass);
+        void WriteObjectsToOpaqueBuffers(cIdVector<cGameObject>& objects, sRenderPass* renderPass);
+        void WriteObjectsToTransparentBuffers(cIdVector<cGameObject>& objects, sRenderPass* renderPass);
         void DrawGeometryOpaque(const sVertexBufferGeometry* geometry, const cGameObject* cameraObject, sRenderPass* renderPass);
         void DrawGeometryOpaque(const sVertexBufferGeometry* geometry, const cGameObject* cameraObject, sShader* singleShader = nullptr);
         void DrawGeometryTransparent(const sVertexBufferGeometry* geometry, const std::vector<cGameObject>& objects, const cGameObject* cameraObject, sRenderPass* renderPass);
@@ -201,8 +204,7 @@ namespace realware
         inline sRenderTarget* GetTransparentRenderTarget() const { return _transparentRenderTarget; }
 
     private:
-        cApplication* _app = nullptr;
-        iRenderContext* _context = nullptr;
+        iRenderContext* _renderContext = nullptr;
         types::usize _maxOpaqueInstanceBufferByteSize = 0;
         types::usize _maxTransparentInstanceBufferByteSize = 0;
         types::usize _maxTextInstanceBufferByteSize = 0;
@@ -256,6 +258,6 @@ namespace realware
         sRenderTarget* _opaqueRenderTarget = nullptr;
         sRenderTarget* _transparentRenderTarget = nullptr;
         types::usize _materialCountCPU = 0;
-        cIdVec<cMaterial> _materialsCPU;
+        cIdVector<cMaterial> _materialsCPU;
     };
 }

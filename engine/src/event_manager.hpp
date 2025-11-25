@@ -3,10 +3,11 @@
 #pragma once
 
 #include <memory>
-#include <vector>
+#include <queue>
 #include <unordered_map>
 #include <functional>
 #include "object.hpp"
+#include "id_vec.hpp"
 #include "types.hpp"
 
 namespace realware
@@ -23,12 +24,12 @@ namespace realware
 
     using EventFunction = std::function<void(cBuffer* const data)>;
 
-    class cEvent : public cObject
+    class cEvent
     {
         friend class mEvent;
 
     public:
-        cEvent(eEvent type, EventFunction&& function);
+        cEvent(eEvent type, cGameObject* receiver, EventFunction&& function);
         ~cEvent() = default;
 
         void Invoke(cBuffer* data);
@@ -37,24 +38,35 @@ namespace realware
         inline std::shared_ptr<EventFunction> GetFunction() const { return _function; }
 
     private:
-        cGameObject* _receiver = nullptr;
         eEvent _type = eEvent::NONE;
+        cGameObject* _receiver = nullptr;
         mutable std::shared_ptr<EventFunction> _function;
     };
 
-    class mEvent : public cObject
+    class mEvent : public iObject
     {
     public:
-        explicit mEvent(cApplication* app);
+        explicit mEvent(cContext* context);
         ~mEvent() = default;
+
+        inline virtual cType GetType() const override final { return cType("EventManager"); }
         
-        void Subscribe(cGameObject* receiver, cEvent& event);
-        void Unsubscribe(const cGameObject* receiver, const cEvent& event);
+        template <typename... Args>
+        void Subscribe(const std::string& id, eEvent type, Args... args);
+        void Unsubscribe(eEvent type, cGameObject* receiver);
         void Send(eEvent type);
         void Send(eEvent type, cBuffer* data);
 
     private:
-        cApplication* _app = nullptr;
-        std::unordered_map<eEvent, std::vector<cEvent>> _listeners;
+        std::unordered_map<eEvent, std::shared_ptr<cIdVector<cEvent>>> _listeners;
     };
+
+    template <typename... Args>
+    void mEvent::Subscribe(const std::string& id, eEvent type, Args... args)
+    {
+        const auto listener = _listeners.find(type);
+        if (listener == _listeners.end())
+            _listeners.insert({ type, std::make_shared<cVector<cEvent>>(GetApplication()) });
+        _listeners[type]->Add(id, type, std::forward<Args>(args)...);
+    }
 }

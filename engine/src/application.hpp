@@ -61,9 +61,10 @@ namespace realware
         types::u32 _maxPhysicsControllerCount = 4;
         types::u32 _maxSoundCount = 65536;
         types::u32 _maxTextureCount = 65536;
+        types::u32 _maxVectorElementCount = 65536;
     };
 
-    class cApplication : public cObject
+    class cApplication
     {
         friend void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
         friend void WindowFocusCallback(GLFWwindow* window, int focused);

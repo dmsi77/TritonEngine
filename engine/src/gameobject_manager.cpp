@@ -10,7 +10,7 @@ using namespace types;
 
 namespace realware
 {
-    cGameObject::cGameObject(const std::string& id, cApplication* app, cMemoryPool* memoryPool) : cIdVecObject(id, app)
+    cGameObject::cGameObject(cContext* context) : cFactoryObject(context)
     {
         sTransform* pTransform = (sTransform*)(memoryPool->Allocate(sizeof(sTransform)));
         _transform = new (pTransform) sTransform();
@@ -18,7 +18,7 @@ namespace realware
 
     void cGameObject::SetPhysicsActor(eCategory staticOrDynamic, eCategory shapeType, cPhysicsSimulationScene* scene, cPhysicsSubstance* substance, f32 mass)
     {
-        mPhysics* physics = _app->GetPhysicsManager();
+        mPhysics* physics = GetApplication()->GetPhysicsManager();
         _actor = physics->CreateActor(
             GetID(),
             staticOrDynamic,
@@ -33,7 +33,7 @@ namespace realware
 
     void cGameObject::SetPhysicsController(f32 eyeHeight, f32 height, f32 radius, const glm::vec3& up, cPhysicsSimulationScene* scene, cPhysicsSubstance* substance)
     {
-        mPhysics* physics = _app->GetPhysicsManager();
+        mPhysics* physics = GetApplication()->GetPhysicsManager();
         _controller = physics->CreateController(
             GetID(),
             eyeHeight,
@@ -46,13 +46,13 @@ namespace realware
         );
     }
 
-    mGameObject::mGameObject(cApplication* app) : _app(app), _maxGameObjectCount(app->GetDesc()->_maxGameObjectCount), _gameObjects(_app, _maxGameObjectCount)
+    mGameObject::mGameObject(cContext* context) : iObject(context), _maxGameObjectCount(app->GetDesc()->_maxGameObjectCount), _gameObjects(app)
     {
     }
 
     cGameObject* mGameObject::CreateGameObject(const std::string& id)
     {
-        return _gameObjects.Add(id, _app->GetMemoryPool());
+        return _gameObjects.Add(id, GetApplication(), GetApplication()->GetMemoryPool());
     }
 
     cGameObject* mGameObject::FindGameObject(const std::string& id)

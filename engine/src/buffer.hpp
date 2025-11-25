@@ -7,7 +7,7 @@
 
 namespace realware
 {
-    class cBuffer : public cObject
+    class cBuffer
     {
     public:
         explicit cBuffer() = default;

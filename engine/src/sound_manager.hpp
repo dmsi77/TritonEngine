@@ -35,11 +35,13 @@ namespace realware
         types::u16* _data = nullptr;
     };
 
-    class cSound : public cIdVecObject
+    class cSound : public cFactoryObject
     {
     public:
-        explicit cSound(const std::string& id, cApplication* app, types::u32 source, types::u32 buffer);
+        explicit cSound(cContext* context, types::u32 source, types::u32 buffer);
         ~cSound();
+
+        inline virtual cType GetType() const override { return cType("Sound"); }
 
         inline eCategory GetFormat() const { return _format; }
         inline sWAVStructure* GetFile() const { return _file; }
@@ -53,11 +55,13 @@ namespace realware
         types::u32 _buffer = 0;
     };
 
-    class mSound : public cObject
+    class mSound : public iObject
     {
     public:
-        mSound(cApplication* app, iSoundContext* context);
+        mSound(cContext* context, iSoundContext* soundContext);
         ~mSound() = default;
+
+        inline virtual cType GetType() const override { return cType("SoundManager"); }
 
         cSound* CreateSound(const std::string& id, const std::string& filename, eCategory format);
         cSound* FindSound(const std::string& id);
@@ -66,6 +70,6 @@ namespace realware
     private:
         cApplication* _app = nullptr;
         iSoundContext* _context = nullptr;
-        cIdVec<cSound> _sounds;
+        cIdVector<cSound> _sounds;
     };
 }

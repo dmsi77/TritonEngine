@@ -15,16 +15,15 @@ namespace realware
         types::usize _dataByteSize = 0;
     };
 
-    class mFileSystem : public cObject
+    class mFileSystem : public iObject
     {
     public:
-        explicit mFileSystem(cApplication* app);
+        explicit mFileSystem(cContext* context);
         ~mFileSystem() = default;
+
+        inline virtual cType GetType() const override final { return cType("FileSystem"); }
 
         sFile* CreateDataFile(const std::string& filepath, types::boolean isString);
         void DestroyDataFile(sFile* buffer);
-
-    private:
-        cApplication* _app = nullptr;
     };
 }

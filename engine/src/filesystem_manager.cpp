@@ -12,7 +12,7 @@ using namespace types;
 
 namespace realware
 {
-    mFileSystem::mFileSystem(cApplication* app) : _app(app)
+    mFileSystem::mFileSystem(cContext* context) : iObject(context)
     {
     }
 
@@ -24,12 +24,14 @@ namespace realware
         const usize byteSize = inputFile.tellg();
         inputFile.seekg(0, std::ios::beg);
         const usize databyteSize = byteSize + (isString == K_TRUE ? 1 : 0);
-            
-        u8* data = (u8*)_app->GetMemoryPool()->Allocate(databyteSize);
+        
+        cApplication* app = GetApplication();
+
+        u8* data = (u8*)app->GetMemoryPool()->Allocate(databyteSize);
         memset(data, 0, databyteSize);
         inputFile.read((char*)&data[0], byteSize);
 
-        sFile* pFile = (sFile*)_app->GetMemoryPool()->Allocate(sizeof(sFile));
+        sFile* pFile = (sFile*)app->GetMemoryPool()->Allocate(sizeof(sFile));
         sFile* file = new (pFile) sFile;
 
         file->_data = data;
@@ -45,6 +47,6 @@ namespace realware
         if (fileData == nullptr || file->_dataByteSize == 0)
             return;
 
-        _app->GetMemoryPool()->Free(fileData);
+        GetApplication()->GetMemoryPool()->Free(fileData);
     }
 }

@@ -9,7 +9,7 @@ using namespace types;
 
 namespace realware
 {
-    cMemoryPool::cMemoryPool(usize byteSize, usize allocs, usize alignment)
+    cMemoryPool::cMemoryPool(cContext* context, usize byteSize, usize allocs, usize alignment) : iObject(context)
     {
         if (alignment == 0)
             _memory = malloc(byteSize);

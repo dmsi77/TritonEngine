@@ -43,7 +43,7 @@ namespace realware
         return out;
     }
 
-    cOpenGLRenderContext::cOpenGLRenderContext(cApplication* app) : _app(app)
+    cOpenGLRenderContext::cOpenGLRenderContext(cContext* context) : iRenderContext(context)
     {
         if (glewInit() != GLEW_OK)
         {
@@ -68,7 +68,7 @@ namespace realware
 
     sBuffer* cOpenGLRenderContext::CreateBuffer(usize byteSize, sBuffer::eType type, const void* data)
     {
-        sBuffer* pBuffer = (sBuffer*)_app->GetMemoryPool()->Allocate(sizeof(sBuffer));
+        sBuffer* pBuffer = (sBuffer*)GetApplication()->GetMemoryPool()->Allocate(sizeof(sBuffer));
         sBuffer* buffer = new (pBuffer) sBuffer();
         buffer->_byteSize = byteSize;
         buffer->_type = type;
@@ -180,13 +180,13 @@ namespace realware
         if (buffer != nullptr)
         {
             buffer->~sBuffer();
-            _app->GetMemoryPool()->Free(buffer);
+            GetApplication()->GetMemoryPool()->Free(buffer);
         }
     }
 
     sVertexArray* cOpenGLRenderContext::CreateVertexArray()
     {
-        sVertexArray* pVertexArray = (sVertexArray*)_app->GetMemoryPool()->Allocate(sizeof(sVertexArray));
+        sVertexArray* pVertexArray = (sVertexArray*)GetApplication()->GetMemoryPool()->Allocate(sizeof(sVertexArray));
         sVertexArray* vertexArray = new (pVertexArray) sVertexArray();
 
         glGenVertexArrays(1, (GLuint*)&vertexArray->_instance);
@@ -229,7 +229,7 @@ namespace realware
         if (vertexArray != nullptr)
         {
             vertexArray->~sVertexArray();
-            _app->GetMemoryPool()->Free(vertexArray);
+            GetApplication()->GetMemoryPool()->Free(vertexArray);
         }
     }
 
@@ -246,7 +246,8 @@ namespace realware
 
     sShader* cOpenGLRenderContext::CreateShader(eCategory renderPath, const std::string& vertexPath, const std::string& fragmentPath, const std::vector<sShader::sDefinePair>& definePairs)
     {
-        sShader* pShader = (sShader*)_app->GetMemoryPool()->Allocate(sizeof(sShader));
+        cApplication* app = GetApplication();
+        sShader* pShader = (sShader*)app->GetMemoryPool()->Allocate(sizeof(sShader));
         sShader* shader = new (pShader) sShader();
 
         std::string header = "";
@@ -279,9 +280,9 @@ namespace realware
 
         const std::string appendStr = "#version 430\n\n#define " + header + "\n\n";
 
-        sFile* vertexShaderFile = _app->GetFileSystemManager()->CreateDataFile(vertexPath, K_TRUE);
+        sFile* vertexShaderFile = app->GetFileSystemManager()->CreateDataFile(vertexPath, K_TRUE);
         shader->_vertex = CleanShaderSource(std::string((const char*)vertexShaderFile->_data));
-        sFile* fragmentShaderFile = _app->GetFileSystemManager()->CreateDataFile(fragmentPath, K_TRUE);
+        sFile* fragmentShaderFile = app->GetFileSystemManager()->CreateDataFile(fragmentPath, K_TRUE);
         shader->_fragment = CleanShaderSource(std::string((const char*)fragmentShaderFile->_data));
             
         DefineInShader(shader, definePairs);
@@ -331,15 +332,15 @@ namespace realware
 		glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
 
-        _app->GetFileSystemManager()->DestroyDataFile(vertexShaderFile);
-        _app->GetFileSystemManager()->DestroyDataFile(fragmentShaderFile);
+        app->GetFileSystemManager()->DestroyDataFile(vertexShaderFile);
+        app->GetFileSystemManager()->DestroyDataFile(fragmentShaderFile);
 
         return shader;
     }
 
     sShader* cOpenGLRenderContext::CreateShader(const sShader* baseShader, const std::string& vertexFunc, const std::string& fragmentFunc, const std::vector<sShader::sDefinePair>& definePairs)
     {
-        sShader* pShader = (sShader*)_app->GetMemoryPool()->Allocate(sizeof(sShader));
+        sShader* pShader = (sShader*)GetApplication()->GetMemoryPool()->Allocate(sizeof(sShader));
         sShader* shader = new (pShader) sShader();
 
         const std::string vertexFuncDefinition = "void Vertex_Func(in vec3 _positionLocal, in vec2 _texcoord, in vec3 _normal, in int _instanceID, in Instance _instance, in Material material, in float _use2D, out vec4 _glPosition){}";
@@ -443,7 +444,7 @@ namespace realware
         if (shader != nullptr)
         {
             shader->~sShader();
-            _app->GetMemoryPool()->Free(shader);
+            GetApplication()->GetMemoryPool()->Free(shader);
         }
     }
 
@@ -459,7 +460,7 @@ namespace realware
 
     sTexture* cOpenGLRenderContext::CreateTexture(usize width, usize height, usize depth, sTexture::eType type, sTexture::eFormat format, const void* data)
     {
-        sTexture* pTexture = (sTexture*)_app->GetMemoryPool()->Allocate(sizeof(sTexture));
+        sTexture* pTexture = (sTexture*)GetApplication()->GetMemoryPool()->Allocate(sizeof(sTexture));
         sTexture* texture = new (pTexture) sTexture();
             
         texture->_width = width;
@@ -673,7 +674,7 @@ namespace realware
 
         if (texture->_type == sTexture::eType::TEXTURE_2D)
         {
-            cMemoryPool* memoryPool = _app->GetMemoryPool();
+            cMemoryPool* memoryPool = GetApplication()->GetMemoryPool();
 
             unsigned char* pixels = (unsigned char*)memoryPool->Allocate(texture->_width * texture->_height * 4);
 
@@ -715,13 +716,13 @@ namespace realware
         if (texture != nullptr)
         {
             texture->~sTexture();
-            _app->GetMemoryPool()->Free(texture);
+            GetApplication()->GetMemoryPool()->Free(texture);
         }
     }
 
     sRenderTarget* cOpenGLRenderContext::CreateRenderTarget(const std::vector<sTexture*>& colorAttachments, sTexture* depthAttachment)
     {
-        sRenderTarget* pRenderTarget = (sRenderTarget*)_app->GetMemoryPool()->Allocate(sizeof(sRenderTarget));
+        sRenderTarget* pRenderTarget = (sRenderTarget*)GetApplication()->GetMemoryPool()->Allocate(sizeof(sRenderTarget));
         sRenderTarget* renderTarget = new (pRenderTarget) sRenderTarget();
 
         renderTarget->_colorAttachments = colorAttachments;
@@ -816,13 +817,13 @@ namespace realware
         if (renderTarget != nullptr)
         {
             renderTarget->~sRenderTarget();
-            _app->GetMemoryPool()->Free(renderTarget);
+            GetApplication()->GetMemoryPool()->Free(renderTarget);
         }
     }
 
     sRenderPass* cOpenGLRenderContext::CreateRenderPass(const sRenderPass::sDescriptor& descriptor)
     {
-        sRenderPass* pRenderPass = (sRenderPass*)_app->GetMemoryPool()->Allocate(sizeof(sRenderPass));
+        sRenderPass* pRenderPass = (sRenderPass*)GetApplication()->GetMemoryPool()->Allocate(sizeof(sRenderPass));
         sRenderPass* renderPass = new (pRenderPass) sRenderPass();
         memset(renderPass, 0, sizeof(sRenderPass));
         renderPass->_desc = descriptor;
@@ -922,7 +923,7 @@ namespace realware
         if (renderPass != nullptr)
         {
             renderPass->~sRenderPass();
-            _app->GetMemoryPool()->Free(renderPass);
+            GetApplication()->GetMemoryPool()->Free(renderPass);
         }
     }
 

@@ -70,9 +70,8 @@ namespace realware
         return wav;
     }
 
-    cOpenALSoundContext::cOpenALSoundContext(cApplication* app)
+    cOpenALSoundContext::cOpenALSoundContext(cContext* context) : iSoundContext(context)
     {
-        _app = app;
         _device = alcOpenDevice(nullptr);
         _context = alcCreateContext(_device, nullptr);
         alcMakeContextCurrent(_context);

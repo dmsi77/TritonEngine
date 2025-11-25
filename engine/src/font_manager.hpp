@@ -47,11 +47,13 @@ namespace realware
         std::string _text = "";
     };
 
-    class mFont : public cObject
+    class mFont : public iObject
     {
     public:
-        mFont(cApplication* app, iRenderContext* context);
+        mFont(cContext* context, iRenderContext* renderContext);
         ~mFont();
+
+        inline virtual cType GetType() const override final { return cType("Font"); }
 
         sFont* CreateFontTTF(const std::string& filename, types::usize glyphSize);
         sText* CreateText(const sFont* font, const std::string& text);
@@ -66,9 +68,8 @@ namespace realware
         static constexpr types::usize K_MAX_ATLAS_WIDTH = 2048;
 
     private:
-        cApplication* _app = nullptr;
         types::boolean _initialized = types::K_FALSE;
-        iRenderContext* _context = nullptr;
+        iRenderContext* _renderContext = nullptr;
         FT_Library _lib = {};
     };
 }

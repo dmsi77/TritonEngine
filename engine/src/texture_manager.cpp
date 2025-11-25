@@ -12,14 +12,14 @@ using namespace types;
 
 namespace realware
 {
-    cTextureAtlasTexture::cTextureAtlasTexture(const std::string& id, cApplication* app, types::boolean isNormalized, const glm::vec3& offset, const glm::vec2& size) : cIdVecObject(id, app), _isNormalized(isNormalized), _offset(offset), _size(size) {}
+    cTextureAtlasTexture::cTextureAtlasTexture(cContext* context, types::boolean isNormalized, const glm::vec3& offset, const glm::vec2& size) : cFactoryObject(context), _isNormalized(isNormalized), _offset(offset), _size(size) {}
 
-    mTexture::mTexture(cApplication* app, iRenderContext* context) : _app(app), _textures(app, app->GetDesc()->_maxTextureCount)
+    mTexture::mTexture(cContext* context, iRenderContext* renderContext) : iObject(context), _textures(app)
     {
-        sApplicationDescriptor* desc = _app->GetDesc();
+        sApplicationDescriptor* desc = GetApplication()->GetDesc();
 
-        _context = context;
-        _atlas = _context->CreateTexture(
+        _renderContext = renderContext;
+        _atlas = _renderContext->CreateTexture(
             desc->_textureAtlasWidth,
             desc->_textureAtlasHeight,
             desc->_textureAtlasDepth,
@@ -32,7 +32,7 @@ namespace realware
 
     mTexture::~mTexture()
     {
-        _context->DestroyTexture(_atlas);
+        _renderContext->DestroyTexture(_atlas);
     }
 
     cTextureAtlasTexture* mTexture::CreateTexture(const std::string& id, const glm::vec2& size, usize channels, const u8* data)
@@ -47,8 +47,8 @@ namespace realware
             return nullptr;
         }
 
-        const auto textures = _textures.GetObjects();
-        const usize texturesCount = _textures.GetObjectCount();
+        const auto textures = _textures.GetElements();
+        const usize texturesCount = _textures.GetElementCount();
         for (usize layer = 0; layer < _atlas->_depth; layer++)
         {
             for (usize y = 0; y < _atlas->_height; y++)
@@ -97,11 +97,11 @@ namespace realware
                         const glm::vec3 offset = glm::vec3(x, y, layer);
                         const glm::vec2 size = glm::vec2(width, height);
 
-                        _context->WriteTexture(_atlas, offset, size, data);
+                        _renderContext->WriteTexture(_atlas, offset, size, data);
                         if (_atlas->_format == sTexture::eFormat::RGBA8_MIPS)
-                            _context->GenerateTextureMips(_atlas);
+                            _renderContext->GenerateTextureMips(_atlas);
 
-                        cTextureAtlasTexture* newTex = _textures.Add(id, K_FALSE, offset, size);
+                        cTextureAtlasTexture* newTex = _textures.Add(id, GetApplication(), K_FALSE, offset, size);
                         *newTex = CalculateNormalizedArea(*newTex);
 
                         return newTex;
@@ -140,7 +140,7 @@ namespace realware
     {
         cTextureAtlasTexture norm = cTextureAtlasTexture(
             area.GetID(),
-            area.GetApplication(),
+            GetApplication(),
             types::K_TRUE,
             glm::vec3(area.GetOffset().x / _atlas->_width, area.GetOffset().y / _atlas->_height, area.GetOffset().z),
             glm::vec2(area.GetSize().x / _atlas->_width, area.GetSize().y / _atlas->_height)

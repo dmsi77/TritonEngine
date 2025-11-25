@@ -16,11 +16,13 @@ namespace realware
         void* _address = nullptr;
     };
 
-    class cMemoryPool : public cObject
+    class cMemoryPool : public iObject
     {
     public:
-        explicit cMemoryPool(types::usize byteSize, types::usize allocs, types::usize alignment);
+        explicit cMemoryPool(cContext* context, types::usize byteSize, types::usize allocs, types::usize alignment);
         ~cMemoryPool();
+
+        inline virtual cType GetType() const override final { return cType("MemoryPool"); }
 
         void* Allocate(types::usize size);
         bool Free(void* address);

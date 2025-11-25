@@ -21,7 +21,7 @@ namespace realware
             _function->operator()(_data);
     }
 
-    mThread::mThread(cApplication* app, usize threadCount) : _app(app), _stop(K_FALSE)
+    mThread::mThread(cContext* context, usize threadCount) : iObject(context), _stop(K_FALSE)
     {
         for (usize i = 0; i < threadCount; ++i)
         {

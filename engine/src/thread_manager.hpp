@@ -18,7 +18,7 @@ namespace realware
 
     using TaskFunction = std::function<void(cBuffer* const data)>;
 
-    class cTask : public cObject
+    class cTask
     {
     public:
         cTask() = default;
@@ -34,19 +34,20 @@ namespace realware
         std::shared_ptr<TaskFunction> _function;
     };
 
-    class mThread : public cObject
+    class mThread : public iObject
     {
     public:
-        explicit mThread(cApplication* app, types::usize threadCount = std::thread::hardware_concurrency());
+        explicit mThread(cContext* context, types::usize threadCount = std::thread::hardware_concurrency());
         ~mThread();
-            
+        
+        inline virtual cType GetType() const override final { return cType("ThreadManager"); }
+
         void Submit(cTask& task);
         void Pause();
         void Resume();
         void Stop();
 
     private:
-        cApplication* _app = nullptr;
         std::vector<std::thread> _threads = {};
         std::queue<cTask> _tasks = {};
         std::mutex _mtx;

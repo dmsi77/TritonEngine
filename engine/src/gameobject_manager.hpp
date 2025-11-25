@@ -25,13 +25,15 @@ namespace realware
     struct sTransform;
     struct sText;
     
-    class cGameObject : public cIdVecObject
+    class cGameObject : public cFactoryObject
     {
         friend class mGameObject;
 
     public:
-        explicit cGameObject(const std::string& id, cApplication* app, cMemoryPool* memoryPool);
+        explicit cGameObject(cContext* context);
         ~cGameObject() = default;
+
+        inline virtual cType GetType() const override { return cType("GameObject"); }
         
         inline types::boolean GetVisible() const { return _isVisible; }
         inline types::boolean GetOpaque() const { return _isOpaque; }
@@ -73,22 +75,23 @@ namespace realware
         cPhysicsController* _controller = nullptr;
     };
 
-    class mGameObject : public cObject
+    class mGameObject : public iObject
     {
     public:
-        explicit mGameObject(cApplication* app);
+        explicit mGameObject(cContext* context);
         ~mGameObject() = default;
+
+        inline virtual cType GetType() const override final { return cType("GameObjectManager"); }
 
         cGameObject* CreateGameObject(const std::string& id);
         cGameObject* FindGameObject(const std::string& id);
         void DestroyGameObject(const std::string& id);
 
-        inline cIdVec<cGameObject>& GetObjects() const { return _gameObjects; }
+        inline cIdVector<cGameObject>& GetObjects() const { return _gameObjects; }
 
     private:
-        cApplication* _app = nullptr;
         types::usize _maxGameObjectCount = 0;
         types::usize _gameObjectCount = 0;
-        mutable cIdVec<cGameObject> _gameObjects;
+        mutable cIdVector<cGameObject> _gameObjects;
     };
 }

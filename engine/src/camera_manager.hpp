@@ -12,11 +12,13 @@ namespace realware
     class cApplication;
     class cGameObject;
 
-    class mCamera : public cObject
+    class mCamera : public iObject
     {
     public:
-        explicit mCamera(cApplication* app);
+        explicit mCamera(cContext* context);
         ~mCamera() = default;
+
+        inline virtual cType GetType() const override final { return cType("CameraManager"); }
 
         void CreateCamera();
         void DestroyCamera();
@@ -37,7 +39,6 @@ namespace realware
     private:
         static constexpr const char* K_CAMERA_ID = "__Camera";
 
-        cApplication* _app = nullptr;
         cGameObject* _cameraGameObject = nullptr;
         glm::vec3 _euler = glm::vec3(0.0f);
         glm::vec3 _direction = glm::vec3(0.0f);

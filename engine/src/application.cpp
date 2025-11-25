@@ -159,7 +159,7 @@ namespace realware
 
     void cApplication::CreateMemoryPool()
     {
-        _memoryPool = new cMemoryPool(_desc._memoryPoolByteSize, _desc._memoryPoolReservedAllocations, _desc._memoryPoolAlignment);
+        _memoryPool = new cMemoryPool(this, _desc._memoryPoolByteSize, _desc._memoryPoolReservedAllocations, _desc._memoryPoolAlignment);
     }
 
     void cApplication::CreateContexts()

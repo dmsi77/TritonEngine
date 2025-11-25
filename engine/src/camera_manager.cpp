@@ -14,13 +14,13 @@ using namespace types;
 
 namespace realware
 {
-    mCamera::mCamera(cApplication* app) : _app(app)
+    mCamera::mCamera(cContext* context) : iObject(context)
     {
     }
 
     void mCamera::CreateCamera()
     {
-        mGameObject* gameObjectManager = _app->GetGameObjectManager();
+        mGameObject* gameObjectManager = GetApplication()->GetGameObjectManager();
         _cameraGameObject = gameObjectManager->CreateGameObject(K_CAMERA_ID);
         _cameraGameObject->SetVisible(K_FALSE);
         _cameraGameObject->SetOpaque(K_FALSE);
@@ -28,13 +28,14 @@ namespace realware
 
     void mCamera::DestroyCamera()
     {
-        mGameObject* gameObjectManager = _app->GetGameObjectManager();
+        mGameObject* gameObjectManager = GetApplication()->GetGameObjectManager();
         gameObjectManager->DestroyGameObject(K_CAMERA_ID);
     }
 
     void mCamera::Update()
     {
-        const f32 deltaTime = _app->GetDeltaTime();
+        cApplication* app = GetApplication();
+        const f32 deltaTime = app->GetDeltaTime();
 
         if (_euler.x > glm::radians(65.0f))
             _euler.x = glm::radians(65.0f);
@@ -48,11 +49,11 @@ namespace realware
 
         sTransform* transform = _cameraGameObject->GetTransform();
         _view = glm::lookAtRH(transform->_position, transform->_position + _direction, glm::vec3(0.0f, 1.0f, 0.0f));
-        _projection = glm::perspective(glm::radians(_fov), _app->GetWindowSize().x / _app->GetWindowSize().y, _zNear, _zFar);
+        _projection = glm::perspective(glm::radians(_fov), app->GetWindowSize().x / app->GetWindowSize().y, _zNear, _zFar);
         _viewProjection = _projection * _view;
 
         double x = 0.0, y = 0.0;
-        glfwGetCursorPos((GLFWwindow*)_app->GetWindow(), &x, &y);
+        glfwGetCursorPos((GLFWwindow*)app->GetWindow(), &x, &y);
 
         _prevCursorPosition = _cursorPosition;
         _cursorPosition = glm::vec2(x, y);
@@ -61,10 +62,10 @@ namespace realware
         AddEuler(eCategory::CAMERA_ANGLE_PITCH, mouseDelta.y * _mouseSensitivity * deltaTime);
         AddEuler(eCategory::CAMERA_ANGLE_YAW, mouseDelta.x * _mouseSensitivity * deltaTime);
         
-        const f32 forward = _app->GetKey('W') * _moveSpeed * deltaTime;
-        const f32 backward = _app->GetKey('S') * _moveSpeed * deltaTime;
-        const f32 left = _app->GetKey('A') * _moveSpeed * deltaTime;
-        const f32 right = _app->GetKey('D') * _moveSpeed * deltaTime;
+        const f32 forward = app->GetKey('W') * _moveSpeed * deltaTime;
+        const f32 backward = app->GetKey('S') * _moveSpeed * deltaTime;
+        const f32 left = app->GetKey('A') * _moveSpeed * deltaTime;
+        const f32 right = app->GetKey('D') * _moveSpeed * deltaTime;
         if (forward > 0.0f || backward > 0.0f || left > 0.0f || right > 0.0f)
         {
             Move(forward);
@@ -94,7 +95,7 @@ namespace realware
 
     void mCamera::Move(f32 value)
     {
-        mPhysics* physics = _app->GetPhysicsManager();
+        mPhysics* physics = GetApplication()->GetPhysicsManager();
         const cPhysicsController* controller = _cameraGameObject->GetPhysicsController();
         const sTransform* transform = _cameraGameObject->GetTransform();
         const glm::vec3 position = transform->_position;
@@ -111,7 +112,7 @@ namespace realware
 
     void mCamera::Strafe(f32 value)
     {
-        mPhysics* physics = _app->GetPhysicsManager();
+        mPhysics* physics = GetApplication()->GetPhysicsManager();
         const cPhysicsController* controller = _cameraGameObject->GetPhysicsController();
         const sTransform* transform = _cameraGameObject->GetTransform();
         const glm::vec3 right = glm::cross(_direction, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -129,7 +130,7 @@ namespace realware
 
     void mCamera::Lift(f32 value)
     {
-        mPhysics* physics = _app->GetPhysicsManager();
+        mPhysics* physics = GetApplication()->GetPhysicsManager();
         const cPhysicsController* controller = _cameraGameObject->GetPhysicsController();
         const sTransform* transform = _cameraGameObject->GetTransform();
         const glm::vec3 position = transform->_position;

@@ -11,7 +11,7 @@ using namespace types;
 
 namespace realware
 {
-    mFont::mFont(cApplication* app, iRenderContext* context) : _app(app), _context(context)
+    mFont::mFont(cContext* context, iRenderContext* renderContext) : iObject(context), _renderContext(renderContext)
     {
         if (FT_Init_FreeType(&_lib))
         {
@@ -174,7 +174,8 @@ namespace realware
 
     sFont* mFont::CreateFontTTF(const std::string& filename, usize glyphSize)
     {
-        cMemoryPool* memoryPool = _app->GetMemoryPool();
+        cApplication* app = GetApplication();
+        cMemoryPool* memoryPool = app->GetMemoryPool();
         sFont* pFont = (sFont*)memoryPool->Allocate(sizeof(sFont));
         sFont* font = new (pFont) sFont;
 
@@ -198,12 +199,12 @@ namespace realware
 
                 FillAlphabetAndFindAtlasSize(memoryPool, font, xOffset, atlasWidth, atlasHeight);
                 MakeAtlasSizePowerOf2(atlasWidth, atlasHeight);
-                FillAtlasWithGlyphs(memoryPool, font, atlasWidth, atlasHeight, _context);
+                FillAtlasWithGlyphs(memoryPool, font, atlasWidth, atlasHeight, _renderContext);
             }
             else
             {
                 font->~sFont();
-                _app->GetMemoryPool()->Free(font);
+                app->GetMemoryPool()->Free(font);
                     
                 return nullptr;
             }
@@ -213,7 +214,7 @@ namespace realware
             Print("Error creating FreeType font face!");
 
             font->~sFont();
-            _app->GetMemoryPool()->Free(font);
+            app->GetMemoryPool()->Free(font);
                 
             return nullptr;
         }
@@ -223,7 +224,7 @@ namespace realware
 
     sText* mFont::CreateText(const sFont* font, const std::string& text)
     {
-        sText* pTextObject = (sText*)_app->GetMemoryPool()->Allocate(sizeof(sText));
+        sText* pTextObject = (sText*)GetApplication()->GetMemoryPool()->Allocate(sizeof(sText));
         sText* textObject = new (pTextObject) sText;
 
         textObject->_font = (sFont*)font;
@@ -237,23 +238,25 @@ namespace realware
         auto& alphabet = font->_alphabet;
         sTexture* atlas = font->_atlas;
 
+        cApplication* app = GetApplication();
+
         for (const auto& glyph : alphabet)
-            _app->GetMemoryPool()->Free(glyph.second._bitmapData);
+            app->GetMemoryPool()->Free(glyph.second._bitmapData);
 
         alphabet.clear();
 
-        _context->DestroyTexture(atlas);
+        _renderContext->DestroyTexture(atlas);
 
         FT_Done_Face(font->_font);
 
         font->~sFont();
-        _app->GetMemoryPool()->Free(font);
+        app->GetMemoryPool()->Free(font);
     }
 
     void mFont::DestroyText(sText* text)
     {
         text->~sText();
-        _app->GetMemoryPool()->Free(text);
+        GetApplication()->GetMemoryPool()->Free(text);
     }
 
     f32 mFont::GetTextWidth(sFont* font, const std::string& text) const
@@ -261,7 +264,7 @@ namespace realware
         f32 textWidth = 0.0f;
         f32 maxTextWidth = 0.0f;
         const usize textByteSize = strlen(text.c_str());
-        const glm::vec2 windowSize = _app->GetWindowSize();
+        const glm::vec2 windowSize = GetApplication()->GetWindowSize();
 
         for (usize i = 0; i < textByteSize; i++)
         {
@@ -301,7 +304,7 @@ namespace realware
         f32 textHeight = 0.0f;
         f32 maxHeight = 0.0f;
         const usize textByteSize = strlen(text.c_str());
-        const glm::vec2 windowSize = _app->GetWindowSize();
+        const glm::vec2 windowSize = GetApplication()->GetWindowSize();
 
         for (usize i = 0; i < textByteSize; i++)
         {

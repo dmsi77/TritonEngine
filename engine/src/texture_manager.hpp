@@ -15,11 +15,13 @@ namespace realware
     class cApplication;
     struct sTexture;
 
-    class cTextureAtlasTexture : public cIdVecObject
+    class cTextureAtlasTexture : public cFactoryObject
     {
     public:
-        cTextureAtlasTexture(const std::string& id, cApplication* app, types::boolean isNormalized, const glm::vec3& offset, const glm::vec2& size);
+        cTextureAtlasTexture(cContext* context, types::boolean isNormalized, const glm::vec3& offset, const glm::vec2& size);
         ~cTextureAtlasTexture() = default;
+
+        inline virtual cType GetType() const override final { return cType("TextureAtlasTexture"); }
 
         inline types::boolean IsNormalized() const { return _isNormalized; }
         inline const glm::vec3& GetOffset() const { return _offset; }
@@ -37,11 +39,13 @@ namespace realware
         types::f32 _textureLayerInfo = 0.0f;
     };
 
-    class mTexture : public cObject
+    class mTexture : public iObject
     {
     public:
-        explicit mTexture(cApplication* app, iRenderContext* context);
+        explicit mTexture(cContext* context, iRenderContext* renderContext);
         ~mTexture();
+
+        inline virtual cType GetType() const override final { return cType("TextureManager"); }
 
         cTextureAtlasTexture* CreateTexture(const std::string& id, const glm::vec2& size, types::usize channels, const types::u8* data);
         cTextureAtlasTexture* CreateTexture(const std::string& id, const std::string& filename);
@@ -56,9 +60,8 @@ namespace realware
         types::usize GetDepth() const;
 
     protected:
-        cApplication* _app = nullptr;
-        iRenderContext* _context = nullptr;
+        iRenderContext* _renderContext = nullptr;
         sTexture* _atlas = nullptr;
-        cIdVec<cTextureAtlasTexture> _textures;
+        cIdVector<cTextureAtlasTexture> _textures;
     };
 }

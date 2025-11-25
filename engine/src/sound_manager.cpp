@@ -9,7 +9,7 @@ using namespace types;
 
 namespace realware
 {
-    cSound::cSound(const std::string& id, cApplication* app, u32 source, u32 buffer) : cIdVecObject(id, app), _source(source), _buffer(buffer) {}
+    cSound::cSound(cContext* context, u32 source, u32 buffer) : cFactoryObject(context), _source(source), _buffer(buffer) {}
 
     cSound::~cSound()
     {
@@ -17,7 +17,7 @@ namespace realware
         {
             if (_format == eCategory::SOUND_FORMAT_WAV)
             {
-                cMemoryPool* memoryPool = _app->GetMemoryPool();
+                cMemoryPool* memoryPool = GetApplication()->GetMemoryPool();
                 memoryPool->Free(_file->_data);
                 _file->~sWAVStructure();
                 memoryPool->Free(_file);
@@ -25,18 +25,16 @@ namespace realware
         }
     }
 
-    mSound::mSound(cApplication* app, iSoundContext* context) : _app(app), _context(context), _sounds(app, app->GetDesc()->_maxSoundCount)
-    {
-    }
+    mSound::mSound(cContext* context, iSoundContext* soundContext) : iObject(context), _soundContext(soundContext), _sounds(app) {}
 
     cSound* mSound::CreateSound(const std::string& id, const std::string& filename, eCategory format)
     {
         u32 source = 0;
         u32 buffer = 0;
         sWAVStructure* file = nullptr;
-        _context->Create(filename, format, (const sWAVStructure**)&file, source, buffer);
+        _soundContext->Create(filename, format, (const sWAVStructure**)&file, source, buffer);
 
-        return _sounds.Add(id, source, buffer);
+        return _sounds.Add(id, GetApplication(), source, buffer);
     }
 
     cSound* mSound::FindSound(const std::string& id)

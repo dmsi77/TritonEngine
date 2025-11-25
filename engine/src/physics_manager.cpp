@@ -31,16 +31,16 @@ namespace realware
         return PxFilterFlag::eDEFAULT;
     }
 
-    mPhysics::mPhysics(cApplication* app) :
-        _app(app),
+    mPhysics::mPhysics(cContext* context) :
+        iObject(context),
         _allocator(new cPhysicsAllocator()),
         _error(new cPhysicsError()),
         _cpuDispatcher(new cPhysicsCPUDispatcher()),
         _simulationEvent(new cPhysicsSimulationEvent()),
-        _scenes(_app, _app->GetDesc()->_maxPhysicsSceneCount),
-        _substances(_app, _app->GetDesc()->_maxPhysicsSubstanceCount),
-        _actors(_app, _app->GetDesc()->_maxPhysicsActorCount),
-        _controllers(_app, _app->GetDesc()->_maxPhysicsControllerCount)
+        _scenes(app),
+        _substances(app),
+        _actors(app),
+        _controllers(app)
     {
         _foundation = PxCreateFoundation(PX_PHYSICS_VERSION, *_allocator, *_error);
         if (_foundation == nullptr)
@@ -67,7 +67,7 @@ namespace realware
         delete _allocator;
     }
 
-    cPhysicsSimulationScene* mPhysics::CreateScene(const std::string& id, const glm::vec3& gravity)
+    cPhysicsScene* mPhysics::CreateScene(const std::string& id, const glm::vec3& gravity)
     {
         PxSceneDesc sceneDesc(_physics->getTolerancesScale());
         sceneDesc.gravity = PxVec3(gravity.y, gravity.x, gravity.z);
@@ -78,17 +78,17 @@ namespace realware
 
         PxControllerManager* controllerManager = PxCreateControllerManager(*scene);
 
-        return _scenes.Add(id, scene, controllerManager);
+        return _scenes.Add(id, GetApplication(), scene, controllerManager);
     }
 
     cPhysicsSubstance* mPhysics::CreateSubstance(const std::string& id, const glm::vec3& params)
     {
         PxMaterial* material = _physics->createMaterial(params.x, params.y, params.z);
 
-        return _substances.Add(id, material);
+        return _substances.Add(id, GetApplication(), material);
     }
 
-    cPhysicsController* mPhysics::CreateController(const std::string& id, f32 eyeHeight, f32 height, f32 radius, const sTransform* transform, const glm::vec3& up, const cPhysicsSimulationScene* scene, const cPhysicsSubstance* substance)
+    cPhysicsController* mPhysics::CreateController(const std::string& id, f32 eyeHeight, f32 height, f32 radius, const sTransform* transform, const glm::vec3& up, const cPhysicsScene* scene, const cPhysicsSubstance* substance)
     {
         const glm::vec3 position = transform->_position;
 
@@ -105,10 +105,10 @@ namespace realware
 
         PxController* controller = scene->GetControllerManager()->createController(desc);
 
-        return _controllers.Add(id, controller, eyeHeight);
+        return _controllers.Add(id, GetApplication(), controller, eyeHeight);
     }
 
-    cPhysicsActor* mPhysics::CreateActor(const std::string& id, eCategory staticOrDynamic, eCategory shapeType, const cPhysicsSimulationScene* scene, const cPhysicsSubstance* substance, f32 mass, const sTransform* transform, cGameObject* gameObject)
+    cPhysicsActor* mPhysics::CreateActor(const std::string& id, eCategory staticOrDynamic, eCategory shapeType, const cPhysicsScene* scene, const cPhysicsSubstance* substance, f32 mass, const sTransform* transform, cGameObject* gameObject)
     {
         const glm::vec3 position = transform->_position;
         const glm::vec3 scale = transform->_scale;
@@ -151,7 +151,7 @@ namespace realware
         return _actors.Add(id, gameObject, actor, staticOrDynamic);
     }
 
-    cPhysicsSimulationScene* mPhysics::FindScene(const std::string& id)
+    cPhysicsScene* mPhysics::FindScene(const std::string& id)
     {
         return _scenes.Find(id);
     }
@@ -194,7 +194,7 @@ namespace realware
     void mPhysics::MoveController(const cPhysicsController* controller, const glm::vec3& position, f32 minStep)
     {
         PxController* pxController = controller->GetController();
-        const f32 deltaTime = _app->GetDeltaTime();
+        const f32 deltaTime = GetApplication()->GetDeltaTime();
 
         PxControllerFilters filters = PxControllerFilters();
         pxController->move(
@@ -215,9 +215,9 @@ namespace realware
 
     void mPhysics::Simulate()
     {
-        const cPhysicsActor* actorsArray = _actors.GetObjects();
+        const cPhysicsActor* actorsArray = _actors.GetElements();
 
-        for (usize i = 0; i < _actors.GetObjectCount(); i++)
+        for (usize i = 0; i < _actors.GetElementCount(); i++)
         {
             auto& actor = actorsArray[i];
 
@@ -243,9 +243,9 @@ namespace realware
             }
         }
 
-        const cPhysicsSimulationScene* scenesArray = _scenes.GetObjects();
+        const cPhysicsScene* scenesArray = _scenes.GetElements();
 
-        for (usize i = 0; i < _scenes.GetObjectCount(); i++)
+        for (usize i = 0; i < _scenes.GetElementCount(); i++)
         {
             PxScene* scene = scenesArray[i].GetScene();
             scene->simulate(1.0f / 60.0f);

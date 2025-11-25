@@ -80,12 +80,12 @@ namespace realware
         );
     }
 
-    mRender::mRender(cApplication* app, iRenderContext* context) : _app(app), _context(context), _materialsCPU(app, app->GetDesc()->_maxMaterialCount)
+    mRender::mRender(cContext* context, iRenderContext* renderContext) : iObject(context), _renderContext(renderContext), _materialsCPU(app)
     {
-        cMemoryPool* memoryPool = _app->GetMemoryPool();
+        cMemoryPool* memoryPool = app->GetMemoryPool();
 
-        const sApplicationDescriptor* desc = _app->GetDesc();
-        const glm::vec2 windowSize = _app->GetWindowSize();
+        const sApplicationDescriptor* desc = app->GetDesc();
+        const glm::vec2 windowSize = app->GetWindowSize();
 
         _maxOpaqueInstanceBufferByteSize = desc->_maxRenderOpaqueInstanceCount * sizeof(sRenderInstance);
         _maxTransparentInstanceBufferByteSize = desc->_maxRenderTransparentInstanceCount * sizeof(sRenderInstance);
@@ -94,25 +94,25 @@ namespace realware
         _maxLightBufferByteSize = desc->_maxLightCount * sizeof(sLightInstance);
         _maxTextureAtlasTexturesBufferByteSize = desc->_maxTextureAtlasTextureCount * sizeof(sTextureAtlasTextureGPU);
 
-        _vertexBuffer = _context->CreateBuffer(desc->_vertexBufferSize, sBuffer::eType::VERTEX, nullptr);
-        _indexBuffer = _context->CreateBuffer(desc->_indexBufferSize, sBuffer::eType::INDEX, nullptr);
-        _opaqueInstanceBuffer = _context->CreateBuffer(_maxOpaqueInstanceBufferByteSize, sBuffer::eType::LARGE, nullptr);
+        _vertexBuffer = _renderContext->CreateBuffer(desc->_vertexBufferSize, sBuffer::eType::VERTEX, nullptr);
+        _indexBuffer = _renderContext->CreateBuffer(desc->_indexBufferSize, sBuffer::eType::INDEX, nullptr);
+        _opaqueInstanceBuffer = _renderContext->CreateBuffer(_maxOpaqueInstanceBufferByteSize, sBuffer::eType::LARGE, nullptr);
         _opaqueInstanceBuffer->_slot = 0;
-        _transparentInstanceBuffer = _context->CreateBuffer(_maxTransparentInstanceBufferByteSize, sBuffer::eType::LARGE, nullptr);
+        _transparentInstanceBuffer = _renderContext->CreateBuffer(_maxTransparentInstanceBufferByteSize, sBuffer::eType::LARGE, nullptr);
         _transparentInstanceBuffer->_slot = 0;
-        _textInstanceBuffer = _context->CreateBuffer(_maxTextInstanceBufferByteSize, sBuffer::eType::LARGE, nullptr);
+        _textInstanceBuffer = _renderContext->CreateBuffer(_maxTextInstanceBufferByteSize, sBuffer::eType::LARGE, nullptr);
         _textInstanceBuffer->_slot = 0;
-        _opaqueMaterialBuffer = _context->CreateBuffer(_maxMaterialBufferByteSize, sBuffer::eType::LARGE, nullptr);
+        _opaqueMaterialBuffer = _renderContext->CreateBuffer(_maxMaterialBufferByteSize, sBuffer::eType::LARGE, nullptr);
         _opaqueMaterialBuffer->_slot = 1;
-        _textMaterialBuffer = _context->CreateBuffer(_maxMaterialBufferByteSize, sBuffer::eType::LARGE, nullptr);
+        _textMaterialBuffer = _renderContext->CreateBuffer(_maxMaterialBufferByteSize, sBuffer::eType::LARGE, nullptr);
         _textMaterialBuffer->_slot = 1;
-        _transparentMaterialBuffer = _context->CreateBuffer(_maxMaterialBufferByteSize, sBuffer::eType::LARGE, nullptr);
+        _transparentMaterialBuffer = _renderContext->CreateBuffer(_maxMaterialBufferByteSize, sBuffer::eType::LARGE, nullptr);
         _transparentMaterialBuffer->_slot = 1;
-        _lightBuffer = _context->CreateBuffer(_maxLightBufferByteSize, sBuffer::eType::LARGE, nullptr);
+        _lightBuffer = _renderContext->CreateBuffer(_maxLightBufferByteSize, sBuffer::eType::LARGE, nullptr);
         _lightBuffer->_slot = 2;
-        _opaqueTextureAtlasTexturesBuffer = _context->CreateBuffer(_maxTextureAtlasTexturesBufferByteSize, sBuffer::eType::LARGE, nullptr);
+        _opaqueTextureAtlasTexturesBuffer = _renderContext->CreateBuffer(_maxTextureAtlasTexturesBufferByteSize, sBuffer::eType::LARGE, nullptr);
         _opaqueTextureAtlasTexturesBuffer->_slot = 3;
-        _transparentTextureAtlasTexturesBuffer = _context->CreateBuffer(_maxTextureAtlasTexturesBufferByteSize, sBuffer::eType::LARGE, nullptr);
+        _transparentTextureAtlasTexturesBuffer = _renderContext->CreateBuffer(_maxTextureAtlasTexturesBufferByteSize, sBuffer::eType::LARGE, nullptr);
         _transparentTextureAtlasTexturesBuffer->_slot = 3;
         _vertices = memoryPool->Allocate(desc->_vertexBufferSize);
         _verticesByteSize = 0;
@@ -136,17 +136,17 @@ namespace realware
         _opaqueTextureAtlasTexturesByteSize = 0;
         _transparentTextureAtlasTextures = memoryPool->Allocate(_maxTextureAtlasTexturesBufferByteSize);
         _transparentTextureAtlasTexturesByteSize = 0;
-        std::unordered_map<cMaterial*, s32>* pMaterialsMap = (std::unordered_map<cMaterial*, s32>*)_app->GetMemoryPool()->Allocate(sizeof(std::unordered_map<cMaterial*, s32>));
+        std::unordered_map<cMaterial*, s32>* pMaterialsMap = (std::unordered_map<cMaterial*, s32>*)app->GetMemoryPool()->Allocate(sizeof(std::unordered_map<cMaterial*, s32>));
         _materialsMap = new (pMaterialsMap) std::unordered_map<cMaterial*, s32>();
 
-        sTexture* color = _context->CreateTexture(windowSize.x, windowSize.y, 0, sTexture::eType::TEXTURE_2D, sTexture::eFormat::RGBA8, nullptr);
-        sTexture* accumulation = _context->CreateTexture(windowSize.x, windowSize.y, 0, sTexture::eType::TEXTURE_2D, sTexture::eFormat::RGBA16F, nullptr);
-        sTexture* ui = _context->CreateTexture(windowSize.x, windowSize.y, 0, sTexture::eType::TEXTURE_2D, sTexture::eFormat::RGBA8, nullptr);
-        sTexture* revealage = _context->CreateTexture(windowSize.x, windowSize.y, 0, sTexture::eType::TEXTURE_2D, sTexture::eFormat::R8F, nullptr);
-        sTexture* depth = _context->CreateTexture(windowSize.x, windowSize.y, 0, sTexture::eType::TEXTURE_2D, sTexture::eFormat::DEPTH_STENCIL, nullptr);
+        sTexture* color = _renderContext->CreateTexture(windowSize.x, windowSize.y, 0, sTexture::eType::TEXTURE_2D, sTexture::eFormat::RGBA8, nullptr);
+        sTexture* accumulation = _renderContext->CreateTexture(windowSize.x, windowSize.y, 0, sTexture::eType::TEXTURE_2D, sTexture::eFormat::RGBA16F, nullptr);
+        sTexture* ui = _renderContext->CreateTexture(windowSize.x, windowSize.y, 0, sTexture::eType::TEXTURE_2D, sTexture::eFormat::RGBA8, nullptr);
+        sTexture* revealage = _renderContext->CreateTexture(windowSize.x, windowSize.y, 0, sTexture::eType::TEXTURE_2D, sTexture::eFormat::R8F, nullptr);
+        sTexture* depth = _renderContext->CreateTexture(windowSize.x, windowSize.y, 0, sTexture::eType::TEXTURE_2D, sTexture::eFormat::DEPTH_STENCIL, nullptr);
 
-        _opaqueRenderTarget = _context->CreateRenderTarget({ color }, depth);
-        _transparentRenderTarget = _context->CreateRenderTarget({ accumulation, revealage }, depth);
+        _opaqueRenderTarget = _renderContext->CreateRenderTarget({ color }, depth);
+        _transparentRenderTarget = _renderContext->CreateRenderTarget({ accumulation, revealage }, depth);
 
         {
             sRenderPass::sDescriptor renderPassDesc;
@@ -157,7 +157,7 @@ namespace realware
             renderPassDesc._inputBuffers.emplace_back(mRender::GetOpaqueMaterialBuffer());
             renderPassDesc._inputBuffers.emplace_back(mRender::GetLightBuffer());
             renderPassDesc._inputBuffers.emplace_back(mRender::GetOpaqueTextureAtlasTexturesBuffer());
-            renderPassDesc._inputTextures.emplace_back(_app->GetTextureManager()->GetAtlas());
+            renderPassDesc._inputTextures.emplace_back(app->GetTextureManager()->GetAtlas());
             renderPassDesc._inputTextureNames.emplace_back("TextureAtlas");
             renderPassDesc._shaderBase = nullptr;
             renderPassDesc._shaderRenderPath = eCategory::RENDER_PATH_OPAQUE;
@@ -170,7 +170,7 @@ namespace realware
             renderPassDesc._blendMode._factorCount = 1;
             renderPassDesc._blendMode._srcFactors[0] = sBlendMode::eFactor::ONE;
             renderPassDesc._blendMode._dstFactors[0] = sBlendMode::eFactor::ZERO;
-            _opaque = _context->CreateRenderPass(renderPassDesc);
+            _opaque = _renderContext->CreateRenderPass(renderPassDesc);
         }
         {
             sRenderPass::sDescriptor renderPassDesc;
@@ -179,7 +179,7 @@ namespace realware
             renderPassDesc._inputBuffers.emplace_back(mRender::GetIndexBuffer());
             renderPassDesc._inputBuffers.emplace_back(mRender::GetTransparentInstanceBuffer());
             renderPassDesc._inputBuffers.emplace_back(mRender::GetTransparentMaterialBuffer());
-            renderPassDesc._inputTextures.emplace_back(_app->GetTextureManager()->GetAtlas());
+            renderPassDesc._inputTextures.emplace_back(app->GetTextureManager()->GetAtlas());
             renderPassDesc._inputTextureNames.emplace_back("TextureAtlas");
             renderPassDesc._shaderBase = nullptr;
             renderPassDesc._shaderRenderPath = eCategory::RENDER_PATH_TRANSPARENT;
@@ -194,7 +194,7 @@ namespace realware
             renderPassDesc._blendMode._dstFactors[0] = sBlendMode::eFactor::ONE;
             renderPassDesc._blendMode._srcFactors[1] = sBlendMode::eFactor::ZERO;
             renderPassDesc._blendMode._dstFactors[1] = sBlendMode::eFactor::INV_SRC_COLOR;
-            _transparent = _context->CreateRenderPass(renderPassDesc);
+            _transparent = _renderContext->CreateRenderPass(renderPassDesc);
         }
         {
             sRenderPass::sDescriptor renderPassDesc;
@@ -209,7 +209,7 @@ namespace realware
             renderPassDesc._viewport = glm::vec4(0.0f, 0.0f, windowSize);
             renderPassDesc._depthMode._useDepthTest = K_FALSE;
             renderPassDesc._depthMode._useDepthWrite = K_FALSE;
-            _text = _context->CreateRenderPass(renderPassDesc);
+            _text = _renderContext->CreateRenderPass(renderPassDesc);
         }
         {
             sRenderPass::sDescriptor renderPassDesc;
@@ -229,7 +229,7 @@ namespace realware
             renderPassDesc._blendMode._factorCount = 1;
             renderPassDesc._blendMode._srcFactors[0] = sBlendMode::eFactor::SRC_ALPHA;
             renderPassDesc._blendMode._dstFactors[0] = sBlendMode::eFactor::INV_SRC_ALPHA;
-            _compositeTransparent = _context->CreateRenderPass(renderPassDesc);
+            _compositeTransparent = _renderContext->CreateRenderPass(renderPassDesc);
         }
         {
             sRenderPass::sDescriptor renderPassDesc;
@@ -247,19 +247,19 @@ namespace realware
             renderPassDesc._blendMode._factorCount = 1;
             renderPassDesc._blendMode._srcFactors[0] = sBlendMode::eFactor::ONE;
             renderPassDesc._blendMode._dstFactors[0] = sBlendMode::eFactor::ZERO;
-            _compositeFinal = _context->CreateRenderPass(renderPassDesc);
+            _compositeFinal = _renderContext->CreateRenderPass(renderPassDesc);
         }
     }
 
     mRender::~mRender()
     {
-        cMemoryPool* memoryPool = _app->GetMemoryPool();
+        cMemoryPool* memoryPool = GetApplication()->GetMemoryPool();
 
-        _context->DestroyBuffer(_vertexBuffer);
-        _context->DestroyBuffer(_indexBuffer);
-        _context->DestroyBuffer(_textInstanceBuffer);
-        _context->DestroyBuffer(_transparentInstanceBuffer);
-        _context->DestroyBuffer(_opaqueInstanceBuffer);
+        _renderContext->DestroyBuffer(_vertexBuffer);
+        _renderContext->DestroyBuffer(_indexBuffer);
+        _renderContext->DestroyBuffer(_textInstanceBuffer);
+        _renderContext->DestroyBuffer(_transparentInstanceBuffer);
+        _renderContext->DestroyBuffer(_opaqueInstanceBuffer);
         _materialsMap->~unordered_map<cMaterial*, s32>();
         memoryPool->Free(_materialsMap);
         memoryPool->Free(_vertices);
@@ -279,9 +279,9 @@ namespace realware
             LoadShaderFiles(customVertexFuncPath, customFragmentFuncPath, vertexFunc, fragmentFunc);
 
             if (customShaderRenderPath == eCategory::RENDER_PATH_OPAQUE)
-                customShader = _context->CreateShader(_opaque->_desc._shader, vertexFunc, fragmentFunc);
+                customShader = _renderContext->CreateShader(_opaque->_desc._shader, vertexFunc, fragmentFunc);
             else if (customShaderRenderPath == eCategory::RENDER_PATH_TRANSPARENT)
-                customShader = _context->CreateShader(_transparent->_desc._shader, vertexFunc, fragmentFunc);
+                customShader = _renderContext->CreateShader(_transparent->_desc._shader, vertexFunc, fragmentFunc);
         }
 
         return _materialsCPU.Add(id, diffuseTexture, diffuseColor, highlightColor, customShader);
@@ -296,35 +296,35 @@ namespace realware
     {
         cMaterial* material = _materialsCPU.Find(id);
         if (material->GetCustomShader() != nullptr)
-            _context->DestroyShader(material->GetCustomShader());
+            _renderContext->DestroyShader(material->GetCustomShader());
 
         _materialsCPU.Delete(id);
     }
 
     sVertexArray* mRender::CreateDefaultVertexArray()
     {
-        sVertexArray* vertexArray = _context->CreateVertexArray();
+        sVertexArray* vertexArray = _renderContext->CreateVertexArray();
         std::vector<sBuffer*> buffersToBind = { _vertexBuffer, _indexBuffer };
 
-        _context->BindVertexArray(vertexArray);
+        _renderContext->BindVertexArray(vertexArray);
         for (auto buffer : buffersToBind)
-            _context->BindBuffer(buffer);
-        _context->BindDefaultInputLayout();
-        _context->UnbindVertexArray();
+            _renderContext->BindBuffer(buffer);
+        _renderContext->BindDefaultInputLayout();
+        _renderContext->UnbindVertexArray();
 
         return vertexArray;
     }
 
     sVertexBufferGeometry* mRender::CreateGeometry(eCategory format, usize verticesByteSize, const void* vertices, usize indicesByteSize, const void* indices)
     {
-        sVertexBufferGeometry* pGeometry = (sVertexBufferGeometry*)_app->GetMemoryPool()->Allocate(sizeof(sVertexBufferGeometry));
+        sVertexBufferGeometry* pGeometry = (sVertexBufferGeometry*)GetApplication()->GetMemoryPool()->Allocate(sizeof(sVertexBufferGeometry));
         sVertexBufferGeometry* geometry = new (pGeometry) sVertexBufferGeometry();
 
         memcpy((void*)((usize)_vertices + _verticesByteSize), vertices, verticesByteSize);
         memcpy((void*)((usize)_indices + _indicesByteSize), indices, indicesByteSize);
 
-        _context->WriteBuffer(_vertexBuffer, _verticesByteSize, verticesByteSize, vertices);
-        _context->WriteBuffer(_indexBuffer, _indicesByteSize, indicesByteSize, indices);
+        _renderContext->WriteBuffer(_vertexBuffer, _verticesByteSize, verticesByteSize, vertices);
+        _renderContext->WriteBuffer(_indexBuffer, _indicesByteSize, indicesByteSize, indices);
 
         usize vertexCount = verticesByteSize;
         usize vertexOffset = _verticesByteSize;
@@ -357,7 +357,7 @@ namespace realware
     void mRender::DestroyGeometry(sVertexBufferGeometry* geometry)
     {
         geometry->~sVertexBufferGeometry();
-        _app->GetMemoryPool()->Free(geometry);
+        GetApplication()->GetMemoryPool()->Free(geometry);
     }
 
     void mRender::ClearGeometryBuffer()
@@ -368,26 +368,26 @@ namespace realware
 
     void mRender::ClearRenderPass(const sRenderPass* renderPass, types::boolean clearColor, usize bufferIndex, const glm::vec4& color, types::boolean clearDepth, f32 depth)
     {
-        _context->BindRenderPass(renderPass);
+        _renderContext->BindRenderPass(renderPass);
         if (clearColor == K_TRUE)
-            _context->ClearFramebufferColor(bufferIndex, color);
+            _renderContext->ClearFramebufferColor(bufferIndex, color);
         if (clearDepth == K_TRUE)
-            _context->ClearFramebufferDepth(depth);
-        _context->UnbindRenderPass(renderPass);
+            _renderContext->ClearFramebufferDepth(depth);
+        _renderContext->UnbindRenderPass(renderPass);
     }
 
     void mRender::ClearRenderPasses(const glm::vec4& clearColor, f32 clearDepth)
     {
-        _context->BindRenderPass(_opaque);
-        _context->ClearFramebufferColor(0, clearColor);
-        _context->ClearFramebufferDepth(clearDepth);
+        _renderContext->BindRenderPass(_opaque);
+        _renderContext->ClearFramebufferColor(0, clearColor);
+        _renderContext->ClearFramebufferDepth(clearDepth);
 			
-        _context->BindRenderPass(_transparent);
-        _context->ClearFramebufferColor(0, glm::vec4(0.0f));
-        _context->ClearFramebufferColor(1, glm::vec4(1.0f));
+        _renderContext->BindRenderPass(_transparent);
+        _renderContext->ClearFramebufferColor(0, glm::vec4(0.0f));
+        _renderContext->ClearFramebufferColor(1, glm::vec4(1.0f));
 
-		_context->BindRenderPass(_text);
-		_context->ClearFramebufferColor(0, clearColor);
+        _renderContext->BindRenderPass(_text);
+        _renderContext->ClearFramebufferColor(0, clearColor);
     }
 
     void mRender::UpdateLights()
@@ -415,7 +415,7 @@ namespace realware
         _context->WriteBuffer(_lightBuffer, 0, _lightsByteSize, _lights);*/
     }
 
-    void mRender::WriteObjectsToOpaqueBuffers(cIdVec<cGameObject>& objects, sRenderPass* renderPass)
+    void mRender::WriteObjectsToOpaqueBuffers(cIdVector<cGameObject>& objects, sRenderPass* renderPass)
     {
         _opaqueInstanceCount = 0;
         _opaqueInstancesByteSize = 0;
@@ -423,9 +423,9 @@ namespace realware
         _opaqueTextureAtlasTexturesByteSize = 0;
         _materialsMap->clear();
 
-        cGameObject* objectsArray = objects.GetObjects();
+        cGameObject* objectsArray = objects.GetElements();
 
-        for (usize i = 0; i < objects.GetObjectCount(); i++)
+        for (usize i = 0; i < objects.GetElementCount(); i++)
         {
             const cGameObject& go = objectsArray[i];
 
@@ -483,21 +483,21 @@ namespace realware
             _opaqueTextureAtlasTexturesByteSize += sizeof(sTextureAtlasTextureGPU);
         }
 
-        _context->WriteBuffer(_opaqueInstanceBuffer, 0, _opaqueInstancesByteSize, _opaqueInstances);
-        _context->WriteBuffer(_opaqueMaterialBuffer, 0, _opaqueMaterialsByteSize, _opaqueMaterials);
-        _context->WriteBuffer(_opaqueTextureAtlasTexturesBuffer, 0, _opaqueTextureAtlasTexturesByteSize, _opaqueTextureAtlasTextures);
+        _renderContext->WriteBuffer(_opaqueInstanceBuffer, 0, _opaqueInstancesByteSize, _opaqueInstances);
+        _renderContext->WriteBuffer(_opaqueMaterialBuffer, 0, _opaqueMaterialsByteSize, _opaqueMaterials);
+        _renderContext->WriteBuffer(_opaqueTextureAtlasTexturesBuffer, 0, _opaqueTextureAtlasTexturesByteSize, _opaqueTextureAtlasTextures);
     }
 
-    void mRender::WriteObjectsToTransparentBuffers(cIdVec<cGameObject>& objects, sRenderPass* renderPass)
+    void mRender::WriteObjectsToTransparentBuffers(cIdVector<cGameObject>& objects, sRenderPass* renderPass)
     {
         _transparentInstanceCount = 0;
         _transparentInstancesByteSize = 0;
         _transparentMaterialsByteSize = 0;
         _materialsMap->clear();
 
-        cGameObject* objectsArray = objects.GetObjects();
+        cGameObject* objectsArray = objects.GetElements();
 
-        for (usize i = 0; i < objects.GetObjectCount(); i++)
+        for (usize i = 0; i < objects.GetElementCount(); i++)
         {
             const cGameObject& go = objectsArray[i];
 
@@ -555,25 +555,25 @@ namespace realware
             _transparentTextureAtlasTexturesByteSize += sizeof(sTextureAtlasTextureGPU);
         }
 
-        _context->WriteBuffer(_transparentInstanceBuffer, 0, _transparentInstancesByteSize, _transparentInstances);
-        _context->WriteBuffer(_transparentMaterialBuffer, 0, _transparentMaterialsByteSize, _transparentMaterials);
-        _context->WriteBuffer(_transparentTextureAtlasTexturesBuffer, 0, _transparentTextureAtlasTexturesByteSize, _transparentTextureAtlasTextures);
+        _renderContext->WriteBuffer(_transparentInstanceBuffer, 0, _transparentInstancesByteSize, _transparentInstances);
+        _renderContext->WriteBuffer(_transparentMaterialBuffer, 0, _transparentMaterialsByteSize, _transparentMaterials);
+        _renderContext->WriteBuffer(_transparentTextureAtlasTexturesBuffer, 0, _transparentTextureAtlasTexturesByteSize, _transparentTextureAtlasTextures);
     }
 
     void mRender::DrawGeometryOpaque(const sVertexBufferGeometry* geometry, const cGameObject* cameraObject, sRenderPass* renderPass)
     {
         if (renderPass == nullptr)
         {
-            _context->BindRenderPass(_opaque);
-            _context->SetShaderUniform(_opaque->_desc._shader, "ViewProjection", cameraObject->GetViewProjectionMatrix());
+            _renderContext->BindRenderPass(_opaque);
+            _renderContext->SetShaderUniform(_opaque->_desc._shader, "ViewProjection", cameraObject->GetViewProjectionMatrix());
         }
         else
         {
-            _context->BindRenderPass(renderPass);
-            _context->SetShaderUniform(renderPass->_desc._shader, "ViewProjection", cameraObject->GetViewProjectionMatrix());
+            _renderContext->BindRenderPass(renderPass);
+            _renderContext->SetShaderUniform(renderPass->_desc._shader, "ViewProjection", cameraObject->GetViewProjectionMatrix());
         }
 
-        _context->Draw(
+        _renderContext->Draw(
             geometry->_indexCount,
             geometry->_offsetVertex,
             geometry->_offsetIndex,
@@ -581,44 +581,44 @@ namespace realware
         );
 
         if (renderPass == nullptr)
-            _context->UnbindRenderPass(_opaque);
+            _renderContext->UnbindRenderPass(_opaque);
         else
-            _context->UnbindRenderPass(renderPass);
+            _renderContext->UnbindRenderPass(renderPass);
     }
 
     void mRender::DrawGeometryOpaque(const sVertexBufferGeometry* geometry, const cGameObject* cameraObject, sShader* singleShader)
     {
-        _context->BindRenderPass(_opaque, singleShader);
+        _renderContext->BindRenderPass(_opaque, singleShader);
 
         if (singleShader == nullptr)
-            _context->SetShaderUniform(_opaque->_desc._shader, "ViewProjection", cameraObject->GetViewProjectionMatrix());
+            _renderContext->SetShaderUniform(_opaque->_desc._shader, "ViewProjection", cameraObject->GetViewProjectionMatrix());
         else
-            _context->SetShaderUniform(singleShader, "ViewProjection", cameraObject->GetViewProjectionMatrix());
+            _renderContext->SetShaderUniform(singleShader, "ViewProjection", cameraObject->GetViewProjectionMatrix());
             
-        _context->Draw(
+        _renderContext->Draw(
             geometry->_indexCount,
             geometry->_offsetVertex,
             geometry->_offsetIndex,
             _opaqueInstanceCount
         );
 
-        _context->UnbindRenderPass(_opaque);
+        _renderContext->UnbindRenderPass(_opaque);
     }
 
     void mRender::DrawGeometryTransparent(const sVertexBufferGeometry* geometry, const std::vector<cGameObject>& objects, const cGameObject* cameraObject, sRenderPass* renderPass)
     {
         if (renderPass == nullptr)
         {
-            _context->BindRenderPass(_transparent);
-            _context->SetShaderUniform(_transparent->_desc._shader, "ViewProjection", cameraObject->GetViewProjectionMatrix());
+            _renderContext->BindRenderPass(_transparent);
+            _renderContext->SetShaderUniform(_transparent->_desc._shader, "ViewProjection", cameraObject->GetViewProjectionMatrix());
         }
         else
         {
-            _context->BindRenderPass(renderPass);
-            _context->SetShaderUniform(renderPass->_desc._shader, "ViewProjection", cameraObject->GetViewProjectionMatrix());
+            _renderContext->BindRenderPass(renderPass);
+            _renderContext->SetShaderUniform(renderPass->_desc._shader, "ViewProjection", cameraObject->GetViewProjectionMatrix());
         }
 
-        _context->Draw(
+        _renderContext->Draw(
             geometry->_indexCount,
             geometry->_offsetVertex,
             geometry->_offsetIndex,
@@ -626,30 +626,30 @@ namespace realware
         );
 
         if (renderPass == nullptr)
-            _context->UnbindRenderPass(_transparent);
+            _renderContext->UnbindRenderPass(_transparent);
         else
-            _context->UnbindRenderPass(renderPass);
+            _renderContext->UnbindRenderPass(renderPass);
 
         CompositeTransparent();
     }
 
     void mRender::DrawGeometryTransparent(const sVertexBufferGeometry* geometry, const cGameObject* cameraObject, sShader* singleShader)
     {
-        _context->BindRenderPass(_transparent, singleShader);
+        _renderContext->BindRenderPass(_transparent, singleShader);
 
         if (singleShader != nullptr)
-            _context->SetShaderUniform(singleShader, "ViewProjection", cameraObject->GetViewProjectionMatrix());
+            _renderContext->SetShaderUniform(singleShader, "ViewProjection", cameraObject->GetViewProjectionMatrix());
         else
-            _context->SetShaderUniform(_transparent->_desc._shader, "ViewProjection", cameraObject->GetViewProjectionMatrix());
+            _renderContext->SetShaderUniform(_transparent->_desc._shader, "ViewProjection", cameraObject->GetViewProjectionMatrix());
 
-        _context->Draw(
+        _renderContext->Draw(
             geometry->_indexCount,
             geometry->_offsetVertex,
             geometry->_offsetIndex,
             _transparentInstanceCount
         );
 
-        _context->UnbindRenderPass(_transparent);
+        _renderContext->UnbindRenderPass(_transparent);
     }
 
     void mRender::DrawTexts(const std::vector<cGameObject>& objects)
@@ -670,7 +670,7 @@ namespace realware
 
             const sTransform transform(&it);
 
-            const glm::vec2 windowSize = _app->GetWindowSize();
+            const glm::vec2 windowSize = GetApplication()->GetWindowSize();
             const glm::vec2 textPosition = glm::vec2((transform._position.x * 2.0f) - 1.0f, (transform._position.y * 2.0f) - 1.0f);
             const glm::vec2 textScale = glm::vec2(
                 (1.0f / windowSize.x) * it.GetTransform()->_scale.x,
@@ -728,37 +728,38 @@ namespace realware
             memcpy(_textMaterials, &mi, sizeof(cMaterialInstance));
             _textMaterialsByteSize += sizeof(cMaterialInstance);
 
-            _context->WriteBuffer(_textInstanceBuffer, 0, _textInstancesByteSize, _textInstances);
-            _context->WriteBuffer(_textMaterialBuffer, 0, _textMaterialsByteSize, _textMaterials);
+            _renderContext->WriteBuffer(_textInstanceBuffer, 0, _textInstancesByteSize, _textInstances);
+            _renderContext->WriteBuffer(_textMaterialBuffer, 0, _textMaterialsByteSize, _textMaterials);
 
-            _context->BindRenderPass(_text);
-            _context->BindTexture(_text->_desc._shader, "FontAtlas", atlas, 0);
-            _context->DrawQuads(actualCharCount);
-            _context->UnbindRenderPass(_text);
+            _renderContext->BindRenderPass(_text);
+            _renderContext->BindTexture(_text->_desc._shader, "FontAtlas", atlas, 0);
+            _renderContext->DrawQuads(actualCharCount);
+            _renderContext->UnbindRenderPass(_text);
         }
     }
 
     void mRender::CompositeTransparent()
     {
-        _context->BindRenderPass(_compositeTransparent);
-        _context->DrawQuad();
-        _context->UnbindRenderPass(_compositeTransparent);
+        _renderContext->BindRenderPass(_compositeTransparent);
+        _renderContext->DrawQuad();
+        _renderContext->UnbindRenderPass(_compositeTransparent);
     }
 
     void mRender::CompositeFinal()
     {
-        _context->BindRenderPass(_compositeFinal);
-        _context->DrawQuad();
-        _context->UnbindRenderPass(_compositeFinal);
+        _renderContext->BindRenderPass(_compositeFinal);
+        _renderContext->DrawQuad();
+        _renderContext->UnbindRenderPass(_compositeFinal);
 			
-        _context->UnbindShader();
+        _renderContext->UnbindShader();
     }
 
     sPrimitive* mRender::CreatePrimitive(eCategory primitive)
     {
-        cMemoryPool* memoryPool = _app->GetMemoryPool();
+        cApplication* app = GetApplication();
+        cMemoryPool* memoryPool = app->GetMemoryPool();
 
-        sPrimitive* pPrimitiveObject = (sPrimitive*)_app->GetMemoryPool()->Allocate(sizeof(sPrimitive));
+        sPrimitive* pPrimitiveObject = (sPrimitive*)app->GetMemoryPool()->Allocate(sizeof(sPrimitive));
         sPrimitive* primitiveObject = new (pPrimitiveObject) sPrimitive();
 
         if (primitive == eCategory::PRIMITIVE_TRIANGLE)
@@ -818,10 +819,11 @@ namespace realware
 
     sModel* mRender::CreateModel(const std::string& filename)
     {
-        cMemoryPool* memoryPool = _app->GetMemoryPool();
+        cApplication* app = GetApplication();
+        cMemoryPool* memoryPool = app->GetMemoryPool();
 
         // Create model
-        sModel* pModel = (sModel*)_app->GetMemoryPool()->Allocate(sizeof(sModel));
+        sModel* pModel = (sModel*)app->GetMemoryPool()->Allocate(sizeof(sModel));
         sModel* model = new (pModel) sModel();
 
         model->_format = eCategory::VERTEX_BUFFER_FORMAT_POS_TEX_NRM_VEC3_VEC2_VEC3;
@@ -878,7 +880,7 @@ namespace realware
 
     void mRender::DestroyPrimitive(sPrimitive* primitiveObject)
     {
-        cMemoryPool* memoryPool = _app->GetMemoryPool();
+        cMemoryPool* memoryPool = GetApplication()->GetMemoryPool();
 
         if (primitiveObject->_vertices)
             memoryPool->Free(primitiveObject->_vertices);
@@ -890,31 +892,32 @@ namespace realware
 
     void mRender::LoadShaderFiles(const std::string& vertexFuncPath, const std::string& fragmentFuncPath, std::string& vertexFunc, std::string& fragmentFunc)
     {
-        sFile* vertexFuncFile = _app->GetFileSystemManager()->CreateDataFile(vertexFuncPath, K_TRUE);
-        sFile* fragmentFuncFile = _app->GetFileSystemManager()->CreateDataFile(fragmentFuncPath, K_TRUE);
+        cApplication* app = GetApplication();
+        sFile* vertexFuncFile = app->GetFileSystemManager()->CreateDataFile(vertexFuncPath, K_TRUE);
+        sFile* fragmentFuncFile = app->GetFileSystemManager()->CreateDataFile(fragmentFuncPath, K_TRUE);
         vertexFunc = std::string((const char*)vertexFuncFile->_data);
         fragmentFunc = std::string((const char*)fragmentFuncFile->_data);
-        _app->GetFileSystemManager()->DestroyDataFile(vertexFuncFile);
-        _app->GetFileSystemManager()->DestroyDataFile(fragmentFuncFile);
+        app->GetFileSystemManager()->DestroyDataFile(vertexFuncFile);
+        app->GetFileSystemManager()->DestroyDataFile(fragmentFuncFile);
     }
 
     void mRender::ResizeWindow(const glm::vec2& size)
     {
-        _context->UnbindRenderPass(_opaque);
-        _context->UnbindRenderPass(_transparent);
+        _renderContext->UnbindRenderPass(_opaque);
+        _renderContext->UnbindRenderPass(_transparent);
 
         _opaque->_desc._viewport[2] = size.x;
         _opaque->_desc._viewport[3] = size.y;
-        _context->ResizeRenderTargetColors(_opaque->_desc._renderTarget, size);
+        _renderContext->ResizeRenderTargetColors(_opaque->_desc._renderTarget, size);
         _transparent->_desc._viewport[2] = size.x;
         _transparent->_desc._viewport[3] = size.y;
-        _context->ResizeRenderTargetColors(_transparent->_desc._renderTarget, size);
+        _renderContext->ResizeRenderTargetColors(_transparent->_desc._renderTarget, size);
         _text->_desc._viewport[2] = size.x;
         _text->_desc._viewport[3] = size.y;
-        _opaque->_desc._renderTarget->_depthAttachment = _context->ResizeTexture(_opaque->_desc._renderTarget->_depthAttachment, size);
+        _opaque->_desc._renderTarget->_depthAttachment = _renderContext->ResizeTexture(_opaque->_desc._renderTarget->_depthAttachment, size);
         _transparent->_desc._renderTarget->_depthAttachment = _opaque->_desc._renderTarget->_depthAttachment;
-        _context->UpdateRenderTargetBuffers(_opaque->_desc._renderTarget);
-        _context->UpdateRenderTargetBuffers(_transparent->_desc._renderTarget);
+        _renderContext->UpdateRenderTargetBuffers(_opaque->_desc._renderTarget);
+        _renderContext->UpdateRenderTargetBuffers(_transparent->_desc._renderTarget);
 
         _compositeTransparent->_desc._viewport[2] = size.x;
         _compositeTransparent->_desc._viewport[3] = size.y;

@@ -9,118 +9,112 @@
 
 namespace realware
 {
-	class cApplication;
-
-	class cIdVecObject : public cObject
-	{
-	public:
-		explicit cIdVecObject(const std::string& id, cApplication* app) : _id(id), _app(app) {}
-		~cIdVecObject() = default;
-
-		inline const std::string& GetID() const { return _id; }
-		inline cApplication* GetApplication() const { return _app; }
-
-	protected:
-		std::string _id = "";
-		cApplication* _app = nullptr;
-
-	private:
-		types::boolean _isDeleted = types::K_FALSE;
-	};
-
 	template <typename T>
-	class cIdVec : public cObject
+	class cIdVector : public iObject
 	{
+		static constexpr types::s32 K_INVALID_INDEX = -1;
+
 	public:
-		explicit cIdVec(const cApplication* const app, const types::usize maxObjectCount);
-		~cIdVec();
+		explicit cIdVector(cContext* context);
+		~cIdVector();
+
+		inline virtual cType GetType() const override final { return cType("IdVector"); }
 
 		template<typename... Args>
-		T* Add(const std::string& id, Args&&... args);
-		T* Add(const T& object);
+		T* Add(Args&&... args);
 		T* Find(const std::string& id);
 		void Delete(const std::string& id);
 
-		inline T* GetObjects() { return _objects; }
-		inline types::usize GetObjectCount() { return _objectCount; }
-		inline types::usize GetMaxObjectCount() { return _maxObjectCount; }
+		inline T* GetElements() { return _elements; }
+		inline types::usize GetElementCount() { return _indexCount; }
+		inline types::usize GetMaxElementCount() { return _maxElementCount; }
 
 	private:
-		cApplication* _app = nullptr;
-		types::usize _objectCount = 0;
-		types::usize _maxObjectCount = 0;
-		T* _objects = nullptr;
+		types::usize _maxElementCount = 0;
+		types::usize _indexCount = 0;
+		types::s32* _indices = nullptr;
+		T* _elements = nullptr;
 	};
 
-	template<typename T>
-	cIdVec<T>::cIdVec(const cApplication* const app, const types::usize maxObjectCount) : _app((cApplication*)app), _maxObjectCount(maxObjectCount)
+	template <typename T>
+	cIdVector<T>::cIdVector(cContext* context) : iObject(context)
 	{
-		_objects = (T*)std::malloc(sizeof(T) * _maxObjectCount);
+		_maxElementCount = app->GetDesc()->_maxVectorElementCount;
+		_indexCount = 0;
+		_indices = (types::s32*)std::malloc(sizeof(types::s32) * _maxElementCount);
+		_elements = (T*)std::malloc(sizeof(T) * _maxElementCount);
+		
+		for (types::usize i = 0; i < _maxElementCount; i++)
+			_indices[i] = K_INVALID_INDEX;
 	}
 
-	template<typename T>
-	cIdVec<T>::~cIdVec()
+	template <typename T>
+	cIdVector<T>::~cIdVector()
 	{
-		std::free(_objects);
-	}
-
-	template<typename T>
-	template<typename... Args>
-	T* cIdVec<T>::Add(const std::string& id, Args&&... args)
-	{
-		if (_objectCount >= _maxObjectCount)
+		if (_indices)
+			std::free(_indices);
+		for (types::usize i = 0; i < _indexCount; i++)
 		{
-			Print("Error: object count limit '" + std::to_string(_maxObjectCount) + "' exceeded!");
-
-			return nullptr;
+			const types::s32 index = _indices[i];
+			((T*)&_elements[index])->~T();
 		}
-
-		types::usize index = _objectCount;
-		new (&_objects[index]) T(id, _app, std::forward<Args>(args)...);
-		_objectCount += 1;
-
-		return &_objects[index];
+		if (_elements)
+			std::free(_elements);
 	}
 
-	template<typename T>
-	T* cIdVec<T>::Add(const T& object)
+	template <typename T>
+	template <typename... Args>
+	T* cIdVector<T>::Add(Args&&... args)
 	{
-		if (_objectCount >= _maxObjectCount)
-		{
-			Print("Error: object count limit '" + std::to_string(_maxObjectCount) + "' exceeded!");
-
+		if (_indexCount >= _maxElementCount)
 			return nullptr;
+
+		const types::s32 index = _indices[_indexCount];
+		if (index == K_INVALID_INDEX)
+		{
+			_indices[_indexCount] = _indexCount;
+			new (&_elements[_indexCount]) T(std::forward<Args>(args)...);
+
+			return (T*)&_elements[_indexCount++];
 		}
+		else
+		{
+			new (&_elements[index]) T(std::forward<Args>(args)...);
+			_indexCount++;
 
-		types::usize index = _objectCount;
-		_objects[index] = object;
-		_objectCount += 1;
-
-		return &_objects[index];
+			return (T*)&_elements[index];
+		}
 	}
 
-	template<typename T>
-	T* cIdVec<T>::Find(const std::string& id)
+	template <typename T>
+	T* cIdVector<T>::Find(const std::string& id)
 	{
-		for (types::usize i = 0; i < _objectCount; i++)
+		for (types::usize i = 0; i < _indexCount; i++)
 		{
-			if (_objects[i].GetID() == id)
-				return &_objects[i];
+			const types::s32 index = _indices[i];
+			if (_elements[index].GetID() == id)
+				return (T*)&_elements[index];
 		}
 
 		return nullptr;
 	}
 
-	template<typename T>
-	void cIdVec<T>::Delete(const std::string& id)
+	template <typename T>
+	void cIdVector<T>::Delete(const std::string& id)
 	{
-		for (types::usize i = 0; i < _objectCount; i++)
+		for (types::usize i = 0; i < _indexCount; i++)
 		{
-			if (_objects[i].GetID() == id)
+			const types::s32 index = _indices[i];
+			if (_elements[index].GetID() == id)
 			{
-				const T& last = _objects[_objectCount - 1];
-				_objects[i] = last;
-				_objectCount -= 1;
+				((T*)&_elements[index])->~T();
+
+				const types::s32 tempIndex = _indices[i];
+				_indices[i] = _indices[_indexCount - 1];
+				_indices[_indexCount - 1] = tempIndex;
+				_indexCount -= 1;
+
+				return;
 			}
 		}
 	}

@@ -11,7 +11,7 @@ using namespace types;
 
 namespace realware
 {
-    cEvent::cEvent(eEvent type, EventFunction&& function) : _type(type), _function(std::make_shared<EventFunction>(std::move(function)))
+    cEvent::cEvent(eEvent type, cGameObject* receiver, EventFunction&& function) : _receiver(receiver), _type(type), _function(std::make_shared<EventFunction>(std::move(function)))
     {
     }
 
@@ -20,33 +20,21 @@ namespace realware
         _function->operator()(data);
     };
 
-    mEvent::mEvent(cApplication* app) : _app(app)
-    {
-    }
+    mEvent::mEvent(cContext* context) : iObject(context) {}
 
-    void mEvent::Subscribe(cGameObject* receiver, cEvent& event)
+    void mEvent::Unsubscribe(eEvent type, cGameObject* receiver)
     {
-        event._receiver = receiver;
-
-        const eEvent eventType = event.GetEventType();
-        const auto listener = _listeners.find(eventType);
-        if (listener == _listeners.end())
-            _listeners.insert({ eventType, {}});
-        _listeners[eventType].push_back(event);
-    }
-
-    void mEvent::Unsubscribe(const cGameObject* receiver, const cEvent& event)
-    {
-        if (_listeners.find(event.GetEventType()) == _listeners.end())
+        if (_listeners.find(type) == _listeners.end())
             return;
 
-        const eEvent eventType = event.GetEventType();
-        auto& events = _listeners[eventType];
-        for (const auto it = events.begin(); it != events.end();)
+        auto& events = _listeners[type];
+        for (usize i = 0; i < events->GetElementCount(); i++)
         {
-            if (it->GetReceiver() == receiver)
+            const cEvent* listenerEvent = &events->GetElements()[i];
+            const cGameObject* listenerReceiver = listenerEvent->GetReceiver();
+            if (listenerReceiver == receiver)
             {
-                events.erase(it);
+                events->Delete(listenerReceiver->GetID());
                 return;
             }
         }
@@ -61,7 +49,11 @@ namespace realware
 
     void mEvent::Send(eEvent type, cBuffer* data)
     {
-        for (auto& event : _listeners[type])
-            event.Invoke(data);
+        if (_listeners.find(type) == _listeners.end())
+            return;
+
+        auto& events = _listeners[type];
+        for (usize i = 0; i < events->GetElementCount(); i++)
+            events->GetElements()[i].Invoke(data);
     }
 }
