@@ -15,6 +15,9 @@ namespace realware
 
         void Create(void* data, types::usize byteSize);
 
+        inline void* GetData() const { return _data; }
+        inline types::usize GetByteSize() const { return _byteSize; }
+
     private:
         void* _data = nullptr;
         types::usize _byteSize = 0;

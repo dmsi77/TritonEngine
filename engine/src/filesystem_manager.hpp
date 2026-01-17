@@ -7,6 +7,8 @@
 
 namespace realware
 {
+    class cDataBuffer;
+
     class cDataFile : public cFactoryObject
     {
         REALWARE_CLASS(cDataFile)
@@ -16,6 +18,8 @@ namespace realware
         virtual ~cDataFile() override final;
 
         void Open(const std::string& path, types::boolean isText);
+
+        inline cDataBuffer* GetBuffer() const { return _data; }
 
     private:
         cDataBuffer* _data = nullptr;

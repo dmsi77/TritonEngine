@@ -18,7 +18,7 @@
 
 namespace realware
 {
-	cEngine::cEngine(cContext* context) : iObject(context) {}
+	cEngine::cEngine(cContext* context, const sEngineCapabilities* capabilities) : iObject(context), _capabilities(capabilities) {}
 
 	void cEngine::Initialize()
 	{
@@ -34,6 +34,7 @@ namespace realware
 		_context->RegisterFactory<cRenderPass>();
 
 		// Register subsystems
+		_context->RegisterSubsystem(this);
 		_context->RegisterSubsystem(new cGraphics(_context));
 		_context->RegisterSubsystem(new cInput(_context));
 		_context->RegisterSubsystem(new cCamera(_context));

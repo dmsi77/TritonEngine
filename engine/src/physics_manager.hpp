@@ -93,18 +93,18 @@ namespace realware
         physx::PxControllerManager* _controllerManager = nullptr;
     };
 
-    class cPhysicsSubstance : public cFactoryObject
+    class cPhysicsMaterial : public cFactoryObject
     {
-        REALWARE_CLASS(cPhysicsSubstance)
+        REALWARE_CLASS(cPhysicsMaterial)
 
     public:
-        explicit cPhysicsSubstance(cContext* context, physx::PxMaterial* substance) : cFactoryObject(context), _substance(substance) {}
-        ~cPhysicsSubstance() = default;
+        explicit cPhysicsMaterial(cContext* context, physx::PxMaterial* material) : cFactoryObject(context), _material(material) {}
+        ~cPhysicsMaterial() = default;
 
-        inline physx::PxMaterial* GetSubstance() const { return _substance; }
+        inline physx::PxMaterial* GetMaterial() const { return _material; }
 
     private:
-        physx::PxMaterial* _substance = nullptr;
+        physx::PxMaterial* _material = nullptr;
     };
 
     class cPhysicsController : public cFactoryObject
@@ -150,15 +150,15 @@ namespace realware
         ~cPhysics();
 
         cPhysicsScene* CreateScene(const std::string& id, const glm::vec3& gravity = glm::vec3(0.0f, -9.81f, 0.0f));
-        cPhysicsSubstance* CreateSubstance(const std::string& id, const glm::vec3& params = glm::vec3(0.5f, 0.5f, 0.6f));
-        cPhysicsActor* CreateActor(const std::string& id, eCategory staticOrDynamic, eCategory shapeType, const cPhysicsScene* scene, const cPhysicsSubstance* substance, types::f32 mass, const sTransform* transform, cGameObject* gameObject);
-        cPhysicsController* CreateController(const std::string& id, types::f32 eyeHeight, types::f32 height, types::f32 radius, const sTransform* transform, const glm::vec3& up, const cPhysicsScene* scene, const cPhysicsSubstance* substance);
+        cPhysicsMaterial* CreateMaterial(const std::string& id, const glm::vec3& params = glm::vec3(0.5f, 0.5f, 0.6f));
+        cPhysicsActor* CreateActor(const std::string& id, eCategory staticOrDynamic, eCategory shapeType, const cPhysicsScene* scene, const cPhysicsMaterial* material, types::f32 mass, const sTransform* transform, cGameObject* gameObject);
+        cPhysicsController* CreateController(const std::string& id, types::f32 eyeHeight, types::f32 height, types::f32 radius, const sTransform* transform, const glm::vec3& up, const cPhysicsScene* scene, const cPhysicsMaterial* material);
         cPhysicsScene* FindScene(const std::string&);
-        cPhysicsSubstance* FindSubstance(const std::string&);
+        cPhysicsMaterial* FindMaterial(const std::string&);
         cPhysicsActor* FindActor(const std::string&);
         cPhysicsController* FindController(const std::string&);
         void DestroyScene(const std::string& id);
-        void DestroySubstance(const std::string& id);
+        void DestroyMaterial(const std::string& id);
         void DestroyActor(const std::string& id);
         void DestroyController(const std::string& id);
 
@@ -175,9 +175,9 @@ namespace realware
         physx::PxFoundation* _foundation = nullptr;
         physx::PxPhysics* _physics = nullptr;
         std::mutex _mutex;
-        cIdVector<cPhysicsScene> _scenes;
-        cIdVector<cPhysicsSubstance> _substances;
-        cIdVector<cPhysicsActor> _actors;
-        cIdVector<cPhysicsController> _controllers;
+        cIdVector<cPhysicsScene>* _scenes;
+        cIdVector<cPhysicsMaterial>* _materials;
+        cIdVector<cPhysicsActor>* _actors;
+        cIdVector<cPhysicsController>* _controllers;
     };
 }

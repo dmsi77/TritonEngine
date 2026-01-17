@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <string>
 #include <windows.h>
+#include "audio.hpp"
 #include "application.hpp"
 #include "sound_context.hpp"
 #include "sound_manager.hpp"
@@ -14,62 +15,6 @@ using namespace types;
 
 namespace realware
 {
-    sWAVStructure* LoadWAVFile(cMemoryPool* memoryPool, const std::string& filename)
-    {
-        sWAVStructure* pWav = (sWAVStructure*)memoryPool->Allocate(sizeof(sWAVStructure));
-        sWAVStructure* wav = new (pWav) sWAVStructure();
-
-        FILE* fp = nullptr;
-        const errno_t err = fopen_s(&fp, &filename.c_str()[0], "rb");
-        if (err != 0)
-            Print("Error: can't open WAV file at '" + filename + "'!");
-
-        // Chunk
-        fread(&wav->_type[0], sizeof(char), 4, fp);
-        if (std::string((const char*)&wav->_type[0]) != std::string("RIFF"))
-            Print("Error: not a RIFF file!");
-
-        fread(&wav->_chunkSize, sizeof(int), 1, fp);
-        fread(&wav->_format[0], sizeof(char), 4, fp);
-        if (std::string((const char*)&wav->_format[0]) != std::string("WAVE"))
-            Print("Error: not a WAVE file!");
-
-        // 1st Subchunk
-        fread(&wav->_subchunk1ID[0], sizeof(char), 4, fp);
-        if (std::string((const char*)&wav->_subchunk1ID[0]) != std::string("fmt "))
-            Print("Error: missing fmt header!");
-        fread(&wav->_subchunk1Size, sizeof(int), 1, fp);
-        fread(&wav->_audioFormat, sizeof(short), 1, fp);
-        fread(&wav->_numChannels, sizeof(short), 1, fp);
-        fread(&wav->_sampleRate, sizeof(int), 1, fp);
-        fread(&wav->_byteRate, sizeof(int), 1, fp);
-        fread(&wav->_blockAlign, sizeof(short), 1, fp);
-        fread(&wav->_bitsPerSample, sizeof(short), 1, fp);
-
-        // 2nd Subchunk
-        fread(&wav->_subchunk2ID[0], sizeof(char), 4, fp);
-        if (std::string((const char*)&wav->_subchunk2ID[0]) != std::string("data"))
-            Print("Error: missing data header!");
-        fread(&wav->_subchunk2Size, sizeof(int), 1, fp);
-
-        // Data
-        const int NumSamples = wav->_subchunk2Size / (wav->_numChannels * (wav->_bitsPerSample / 8));
-        wav->_dataByteSize = NumSamples * (wav->_bitsPerSample / 8) * wav->_numChannels;
-        wav->_data = (unsigned short*)memoryPool->Allocate(wav->_dataByteSize);
-        if (wav->_bitsPerSample == 16 && wav->_numChannels == 2)
-        {
-            for (int i = 0; i < NumSamples; i++)
-            {
-                const int idx = i * 2;
-                fread(&wav->_data[idx], sizeof(short), 1, fp);
-                fread(&wav->_data[idx + 1], sizeof(short), 1, fp);
-            }
-        }
-        fclose(fp);
-
-        return wav;
-    }
-
     cOpenALSoundAPI::cOpenALSoundAPI(cContext* context) : iSoundAPI(context)
     {
         _device = alcOpenDevice(nullptr);
@@ -84,12 +29,12 @@ namespace realware
         alcCloseDevice(_device);
     }
 
-    void cOpenALSoundAPI::Create(const std::string& filename, eCategory format, const sWAVStructure** file, types::u32& source, types::u32& buffer)
+    void cOpenALSoundAPI::Create(cSound::eFormat type, cSound* sound)
     {
-        if (format == eCategory::SOUND_FORMAT_WAV)
+        if (type == cSound::eFormat::WAV)
         {
-            const sWAVStructure* wavFile = LoadWAVFile(_app->GetMemoryPool(), filename);
-            *file = wavFile;
+            ALuint source = 0;
+            ALuint buffer = 0;
 
             alGenSources(1, (ALuint*)&source);
             alSourcef(source, AL_PITCH, 1);
@@ -101,21 +46,28 @@ namespace realware
             alGenBuffers(1, (ALuint*)&buffer);
 
             ALenum wavFormat = AL_FORMAT_STEREO16;
-            bool stereo = (wavFile->_numChannels > 1);
-            switch (wavFile->_bitsPerSample) {
+            types::boolean stereo = sound->GetChannelCount() > 1;
+            switch (sound->GetBitsPerSample())
+            {
                 case 16:
-                    if (stereo) {
+                    if (stereo)
+                    {
                         wavFormat = AL_FORMAT_STEREO16;
                         break;
-                    } else {
+                    }
+                    else
+                    {
                         wavFormat = AL_FORMAT_MONO16;
                         break;
                     }
                 case 8:
-                    if (stereo) {
+                    if (stereo)
+                    {
                         wavFormat = AL_FORMAT_STEREO8;
                         break;
-                    } else {
+                    }
+                    else
+                    {
                         wavFormat = AL_FORMAT_MONO8;
                         break;
                     }
@@ -123,8 +75,11 @@ namespace realware
                     break;
             }
 
-            alBufferData(buffer, wavFormat, wavFile->_data, wavFile->_dataByteSize, wavFile->_sampleRate);
+            alBufferData(buffer, wavFormat, sound->GetData(), sound->GetDataByteSize(), sound->GetSampleRate());
             alSourcei(source, AL_BUFFER, buffer);
+
+            sound->SetSource(source);
+            sound->SetBuffer(buffer);
         }
     }
 

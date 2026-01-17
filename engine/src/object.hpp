@@ -13,7 +13,6 @@ namespace realware
 	class cContext;
 	class cDataBuffer;
 	class cGameObject;
-	class cMemoryAllocator;
 	template <typename T>
 	class cFactory;
 

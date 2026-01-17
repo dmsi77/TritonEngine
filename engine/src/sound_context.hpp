@@ -6,6 +6,7 @@
 #include <AL/al.h>
 #include <AL/alc.h>
 #include "../../thirdparty/glm/glm/glm.hpp"
+#include "audio.hpp"
 #include "category.hpp"
 #include "object.hpp"
 #include "id_vec.hpp"
@@ -25,7 +26,7 @@ namespace realware
         explicit iSoundAPI(cContext* context) : iObject(context) {}
         virtual ~iSoundAPI() = default;
 
-        virtual void Create(const std::string& filename, eCategory format, const sWAVStructure** file, types::u32& source, types::u32& buffer) = 0;
+        virtual void Create(cSound::eFormat type, cSound* sound) = 0;
         virtual void Destroy(cSound* sound) = 0;
         virtual void Play(const cSound* sound) = 0;
         virtual void Stop(const cSound* sound) = 0;
@@ -44,7 +45,7 @@ namespace realware
         cOpenALSoundAPI(cContext* context);
         virtual ~cOpenALSoundAPI() override final;
 
-        virtual void Create(const std::string& filename, eCategory format, const sWAVStructure** file, types::u32& source, types::u32& buffer) override final;
+        virtual void Create(cSound::eFormat type, cSound* sound) override final;
         virtual void Destroy(cSound* sound) override final;
         virtual void Play(const cSound* sound) override final;
         virtual void Stop(const cSound* sound) override final;

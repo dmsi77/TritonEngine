@@ -148,7 +148,7 @@ namespace realware
             atlasWidth,
             atlasHeight,
             0,
-            cTexture::eType::TEXTURE_2D,
+            cTexture::eDimension::TEXTURE_2D,
             cTexture::eFormat::R8,
             atlasPixels
         );

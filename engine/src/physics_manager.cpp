@@ -4,6 +4,9 @@
 #include <cooking/PxCooking.h>
 #include "../../thirdparty/glm/glm/gtc/quaternion.hpp"
 #include "application.hpp"
+#include "context.hpp"
+#include "time.hpp"
+#include "graphics.hpp"
 #include "render_manager.hpp"
 #include "physics_manager.hpp"
 #include "gameobject_manager.hpp"
@@ -36,12 +39,14 @@ namespace realware
         _allocator(new cPhysicsAllocator()),
         _error(new cPhysicsError()),
         _cpuDispatcher(new cPhysicsCPUDispatcher()),
-        _simulationEvent(new cPhysicsSimulationEvent()),
-        _scenes(context),
-        _substances(context),
-        _actors(context),
-        _controllers(context)
+        _simulationEvent(new cPhysicsSimulationEvent())
     {
+        const sEngineCapabilities* capabilities = context->GetSubsystem<cEngine>()->GetCapabilities();
+        _scenes = _context->Create<cIdVector<cPhysicsScene>>(context, capabilities->_maxPhysicsSceneCount);
+        _materials = _context->Create<cIdVector<cPhysicsMaterial>>(context, capabilities->_maxPhysicsMaterialCount);
+        _actors = _context->Create<cIdVector<cPhysicsActor>>(context, capabilities->_maxPhysicsActorCount);
+        _controllers = _context->Create<cIdVector<cPhysicsController>>(context, capabilities->_maxPhysicsControllerCount);
+
         _foundation = PxCreateFoundation(PX_PHYSICS_VERSION, *_allocator, *_error);
         if (_foundation == nullptr)
         {
@@ -61,6 +66,10 @@ namespace realware
     {
         _physics->release();
         _foundation->release();
+        _context->Destroy<cIdVector<cPhysicsController>>(_controllers);
+        _context->Destroy<cIdVector<cPhysicsActor>>(_actors);
+        _context->Destroy<cIdVector<cPhysicsMaterial>>(_materials);
+        _context->Destroy<cIdVector<cPhysicsScene>>(_scenes);
         delete _simulationEvent;
         delete _cpuDispatcher;
         delete _error;
@@ -78,17 +87,17 @@ namespace realware
 
         PxControllerManager* controllerManager = PxCreateControllerManager(*scene);
 
-        return _scenes.Add(id, GetApplication(), scene, controllerManager);
+        return _scenes->Add(id, _context, scene, controllerManager);
     }
 
-    cPhysicsSubstance* cPhysics::CreateSubstance(const std::string& id, const glm::vec3& params)
+    cPhysicsMaterial* cPhysics::CreateMaterial(const std::string& id, const glm::vec3& params)
     {
         PxMaterial* material = _physics->createMaterial(params.x, params.y, params.z);
 
-        return _substances.Add(id, GetApplication(), material);
+        return _materials->Add(id, _context, material);
     }
 
-    cPhysicsController* cPhysics::CreateController(const std::string& id, f32 eyeHeight, f32 height, f32 radius, const sTransform* transform, const glm::vec3& up, const cPhysicsScene* scene, const cPhysicsSubstance* substance)
+    cPhysicsController* cPhysics::CreateController(const std::string& id, f32 eyeHeight, f32 height, f32 radius, const sTransform* transform, const glm::vec3& up, const cPhysicsScene* scene, const cPhysicsMaterial* material)
     {
         const glm::vec3 position = transform->_position;
 
@@ -101,14 +110,14 @@ namespace realware
         desc.slopeLimit = cosf(PxPi / 4.0f);
         desc.contactOffset = 0.01f;
         desc.upDirection = PxVec3(up.y, up.x, up.z);
-        desc.material = substance->GetSubstance();
+        desc.material = material->GetMaterial();
 
         PxController* controller = scene->GetControllerManager()->createController(desc);
 
-        return _controllers.Add(id, GetApplication(), controller, eyeHeight);
+        return _controllers->Add(id, _context, controller, eyeHeight);
     }
 
-    cPhysicsActor* cPhysics::CreateActor(const std::string& id, eCategory staticOrDynamic, eCategory shapeType, const cPhysicsScene* scene, const cPhysicsSubstance* substance, f32 mass, const sTransform* transform, cGameObject* gameObject)
+    cPhysicsActor* cPhysics::CreateActor(const std::string& id, eCategory staticOrDynamic, eCategory shapeType, const cPhysicsScene* scene, const cPhysicsMaterial* material, f32 mass, const sTransform* transform, cGameObject* gameObject)
     {
         const glm::vec3 position = transform->_position;
         const glm::vec3 scale = transform->_scale;
@@ -117,9 +126,9 @@ namespace realware
             
         PxShape* shape = nullptr;
         if (shapeType == eCategory::PHYSICS_SHAPE_PLANE)
-            shape = _physics->createShape(PxPlaneGeometry(), *substance->GetSubstance(), false, PxShapeFlag::eSIMULATION_SHAPE | PxShapeFlag::eSCENE_QUERY_SHAPE);
+            shape = _physics->createShape(PxPlaneGeometry(), *material->GetMaterial(), false, PxShapeFlag::eSIMULATION_SHAPE | PxShapeFlag::eSCENE_QUERY_SHAPE);
         else if (shapeType == eCategory::PHYSICS_SHAPE_BOX)
-            shape = _physics->createShape(PxBoxGeometry(scale.y * 0.5f, scale.x * 0.5f, scale.z * 0.5f), *substance->GetSubstance(), false, PxShapeFlag::eSIMULATION_SHAPE | PxShapeFlag::eSCENE_QUERY_SHAPE);
+            shape = _physics->createShape(PxBoxGeometry(scale.y * 0.5f, scale.x * 0.5f, scale.z * 0.5f), *material->GetMaterial(), false, PxShapeFlag::eSIMULATION_SHAPE | PxShapeFlag::eSCENE_QUERY_SHAPE);
 
         if (shape == nullptr)
             return nullptr;
@@ -148,53 +157,55 @@ namespace realware
         if (actor != nullptr)
             scene->GetScene()->addActor(*actor);
 
-        return _actors.Add(id, gameObject, actor, staticOrDynamic);
+        return _actors->Add(id, gameObject, actor, staticOrDynamic);
     }
 
     cPhysicsScene* cPhysics::FindScene(const std::string& id)
     {
-        return _scenes.Find(id);
+        return _scenes->Find(id);
     }
 
-    cPhysicsSubstance* cPhysics::FindSubstance(const std::string& id)
+    cPhysicsMaterial* cPhysics::FindMaterial(const std::string& id)
     {
-        return _substances.Find(id);
+        return _materials->Find(id);
     }
 
     cPhysicsActor* cPhysics::FindActor(const std::string& id)
     {
-        return _actors.Find(id);
+        return _actors->Find(id);
     }
 
     cPhysicsController* cPhysics::FindController(const std::string& id)
     {
-        return _controllers.Find(id);
+        return _controllers->Find(id);
     }
 
     void cPhysics::DestroyScene(const std::string& id)
     {
-        _scenes.Delete(id);
+        _scenes->Delete(id);
     }
 
-    void cPhysics::DestroySubstance(const std::string& id)
+    void cPhysics::DestroyMaterial(const std::string& id)
     {
-        _substances.Delete(id);
+        _materials->Delete(id);
     }
 
     void cPhysics::DestroyActor(const std::string& id)
     {
-        _actors.Delete(id);
+        _actors->Delete(id);
     }
 
     void cPhysics::DestroyController(const std::string& id)
     {
-        _controllers.Delete(id);
+        _controllers->Delete(id);
     }
 
     void cPhysics::MoveController(const cPhysicsController* controller, const glm::vec3& position, f32 minStep)
     {
+        cTime* time = _context->GetSubsystem<cTime>();
+        const f32 deltaTime = time->GetDeltaTime();
+
         PxController* pxController = controller->GetController();
-        const f32 deltaTime = GetApplication()->GetDeltaTime();
 
         PxControllerFilters filters = PxControllerFilters();
         pxController->move(
@@ -215,9 +226,9 @@ namespace realware
 
     void cPhysics::Simulate()
     {
-        const cPhysicsActor* actorsArray = _actors.GetElements();
+        const cPhysicsActor* actorsArray = _actors->GetElements();
 
-        for (usize i = 0; i < _actors.GetElementCount(); i++)
+        for (usize i = 0; i < _actors->GetElementCount(); i++)
         {
             auto& actor = actorsArray[i];
 
@@ -243,9 +254,9 @@ namespace realware
             }
         }
 
-        const cPhysicsScene* scenesArray = _scenes.GetElements();
+        const cPhysicsScene* scenesArray = _scenes->GetElements();
 
-        for (usize i = 0; i < _scenes.GetElementCount(); i++)
+        for (usize i = 0; i < _scenes->GetElementCount(); i++)
         {
             PxScene* scene = scenesArray[i].GetScene();
             scene->simulate(1.0f / 60.0f);

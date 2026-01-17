@@ -5,6 +5,7 @@
 #include <string>
 #include <lodepng.h>
 #include <GL/glew.h>
+#include "buffer.hpp"
 #include "render_context.hpp"
 #include "filesystem_manager.hpp"
 #include "types.hpp"
@@ -272,10 +273,10 @@ namespace realware
         const std::string appendStr = "#version 430\n\n#define " + header + "\n\n";
 
         cFileSystem* fileSystem = _context->GetSubsystem<cFileSystem>();
-        sFile* vertexShaderFile = fileSystem->CreateDataFile(vertexPath, K_TRUE);
-        shader->_vertex = CleanShaderSource(std::string((const char*)vertexShaderFile->_data));
-        sFile* fragmentShaderFile = fileSystem->CreateDataFile(fragmentPath, K_TRUE);
-        shader->_fragment = CleanShaderSource(std::string((const char*)fragmentShaderFile->_data));
+        cDataFile* vertexShaderFile = fileSystem->CreateDataFile(vertexPath, K_TRUE);
+        shader->_vertex = CleanShaderSource(std::string((const char*)vertexShaderFile->GetBuffer()->GetData()));
+        cDataFile* fragmentShaderFile = fileSystem->CreateDataFile(fragmentPath, K_TRUE);
+        shader->_fragment = CleanShaderSource(std::string((const char*)fragmentShaderFile->GetBuffer()->GetData()));
             
         DefineInShader(shader, definePairs);
 
@@ -446,13 +447,13 @@ namespace realware
         glUniform4fv(glGetUniformLocation(shader->_instance, name.c_str()), count, &values[0]);
     }
 
-    cTexture* cOpenGLGraphicsAPI::CreateTexture(usize width, usize height, usize depth, cTexture::eType type, cTexture::eFormat format, const void* data)
+    cTexture* cOpenGLGraphicsAPI::CreateTexture(usize width, usize height, usize depth, cTexture::eDimension dimension, cTexture::eFormat format, const void* data)
     {
         cTexture* texture = _context->Create<cTexture>();
         texture->_width = width;
         texture->_height = height;
         texture->_depth = depth;
-        texture->_type = type;
+        texture->_dimension = dimension;
         texture->_format = format;
 
         glGenTextures(1, (GLuint*)&texture->_instance);
@@ -497,7 +498,7 @@ namespace realware
             formatComponentGL = GL_UNSIGNED_INT_24_8;
         }
 
-        if (texture->_type == cTexture::eType::TEXTURE_2D)
+        if (texture->GetDimension() == cTexture::eDimension::TEXTURE_2D)
         {
             glBindTexture(GL_TEXTURE_2D, texture->_instance);
 
@@ -520,7 +521,7 @@ namespace realware
 
             glBindTexture(GL_TEXTURE_2D, 0);
         }
-        else if (texture->_type == cTexture::eType::TEXTURE_2D_ARRAY)
+        else if (texture->GetDimension() == cTexture::eDimension::TEXTURE_2D_ARRAY)
         {
             glBindTexture(GL_TEXTURE_2D_ARRAY, texture->_instance);
 
@@ -547,11 +548,9 @@ namespace realware
 
     cTexture* cOpenGLGraphicsAPI::ResizeTexture(cTexture* texture, const glm::vec2& size)
     {
-        cTexture textureCopy = *texture;
+        cTexture* newTexture = CreateTexture(size.x, size.y, texture->GetDepth(), texture->GetDimension(), texture->GetFormat(), nullptr);
         DestroyTexture(texture);
 
-        cTexture* newTexture = CreateTexture(size.x, size.y, textureCopy._depth, textureCopy._type, textureCopy._format, nullptr);
-            
         return newTexture;
     }
 
@@ -560,14 +559,14 @@ namespace realware
         if (slot == -1)
             slot = texture->_slot;
 
-        if (texture->_type == cTexture::eType::TEXTURE_2D)
+        if (texture->GetDimension() == cTexture::eDimension::TEXTURE_2D)
         {
             glUniform1i(glGetUniformLocation(shader->_instance, name.c_str()), slot);
             glActiveTexture(GL_TEXTURE0 + slot);
             glBindTexture(GL_TEXTURE_2D, texture->_instance);
             glActiveTexture(GL_TEXTURE0);
         }
-        else if (texture->_type == cTexture::eType::TEXTURE_2D_ARRAY)
+        else if (texture->GetDimension() == cTexture::eDimension::TEXTURE_2D_ARRAY)
         {
             glUniform1i(glGetUniformLocation(shader->_instance, name.c_str()), slot);
             glActiveTexture(GL_TEXTURE0 + slot);
@@ -578,7 +577,7 @@ namespace realware
 
     void cOpenGLGraphicsAPI::UnbindTexture(const cTexture* texture)
     {
-        if (texture->_type == cTexture::eType::TEXTURE_2D_ARRAY)
+        if (texture->GetDimension() == cTexture::eDimension::TEXTURE_2D_ARRAY)
             glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
     }
 
@@ -625,13 +624,13 @@ namespace realware
             formatComponentGL = GL_UNSIGNED_INT_24_8;
         }
 
-        if (texture->_type == cTexture::eType::TEXTURE_2D)
+        if (texture->GetDimension() == cTexture::eDimension::TEXTURE_2D)
         {
             glBindTexture(GL_TEXTURE_2D, texture->_instance);
             glTexSubImage2D(GL_TEXTURE_2D, 0, offset.x, offset.y, size.x, size.y, channelsGL, formatComponentGL, data);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
-        else if (texture->_type == cTexture::eType::TEXTURE_2D_ARRAY)
+        else if (texture->GetDimension() == cTexture::eDimension::TEXTURE_2D_ARRAY)
         {
             if (offset.x + size.x <= texture->_width && offset.y + size.y <= texture->_height && offset.z < texture->_depth)
             {
@@ -644,25 +643,25 @@ namespace realware
 
     void cOpenGLGraphicsAPI::WriteTextureToFile(const cTexture* texture, const std::string& filename)
     {
-        if (texture->_format != cTexture::eFormat::RGBA8)
+        if (texture->GetFormat() != cTexture::eFormat::RGBA8)
             return;
 
         GLenum channelsGL = GL_RGBA;
         GLenum formatComponentGL = GL_UNSIGNED_BYTE;
         usize formatByteCount = 4;
 
-        if (texture->_format == cTexture::eFormat::RGBA8)
+        if (texture->GetFormat() == cTexture::eFormat::RGBA8)
         {
             channelsGL = GL_RGBA;
             formatComponentGL = GL_UNSIGNED_BYTE;
             formatByteCount = 4;
         }
 
-        if (texture->_type == cTexture::eType::TEXTURE_2D)
+        if (texture->GetDimension() == cTexture::eDimension::TEXTURE_2D)
         {
-            cMemoryPool<u8>* memoryPool = _context->GetMemoryPool<u8>();
+            cMemoryAllocator* memoryAllocator = _context->GetMemoryAllocator();
 
-            u8* pixels = (u8*)memoryPool->Allocate();
+            u8* pixels = (u8*)memoryAllocator->Allocate(texture->GetWidth() * texture->GetHeight() * formatByteCount, 64);
 
             glBindTexture(GL_TEXTURE_2D, texture->_instance);
             glGetTexImage(GL_TEXTURE_2D, 0, channelsGL, formatComponentGL, pixels);
@@ -670,19 +669,19 @@ namespace realware
 
             lodepng_encode32_file(filename.c_str(), pixels, texture->_width, texture->_height);
 
-            memoryPool->Deallocate(pixels);
+            memoryAllocator->Deallocate(pixels);
         }
     }
 
     void cOpenGLGraphicsAPI::GenerateTextureMips(const cTexture* texture)
     {
-        if (texture->_type == cTexture::eType::TEXTURE_2D)
+        if (texture->GetDimension() == cTexture::eDimension::TEXTURE_2D)
         {
             glBindTexture(GL_TEXTURE_2D, texture->_instance);
             glGenerateMipmap(GL_TEXTURE_2D);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
-        else if (texture->_type == cTexture::eType::TEXTURE_2D_ARRAY)
+        else if (texture->GetDimension() == cTexture::eDimension::TEXTURE_2D_ARRAY)
         {
             glBindTexture(GL_TEXTURE_2D_ARRAY, texture->_instance);
             glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
@@ -692,9 +691,9 @@ namespace realware
 
     void cOpenGLGraphicsAPI::DestroyTexture(cTexture* texture)
     {
-        if (texture->_type == cTexture::eType::TEXTURE_2D)
+        if (texture->GetDimension() == cTexture::eDimension::TEXTURE_2D)
             glBindTexture(GL_TEXTURE_2D, 0);
-        else if (texture->_type == cTexture::eType::TEXTURE_2D_ARRAY)
+        else if (texture->GetDimension() == cTexture::eDimension::TEXTURE_2D_ARRAY)
             glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 
         glDeleteTextures(1, (GLuint*)&texture->_instance);
@@ -734,9 +733,8 @@ namespace realware
         std::vector<cTexture*> newColorAttachments;
         for (auto attachment : renderTarget->_colorAttachments)
         {
-            cTexture attachmentCopy = *attachment;
+            newColorAttachments.emplace_back(CreateTexture(size.x, size.y, attachment->GetDepth(), attachment->GetDimension(), attachment->GetFormat(), nullptr));
             DestroyTexture(attachment);
-            newColorAttachments.emplace_back(CreateTexture(size.x, size.y, attachmentCopy._depth, attachmentCopy._type, attachmentCopy._format, nullptr));
         }
         renderTarget->_colorAttachments.clear();
         renderTarget->_colorAttachments = newColorAttachments;
@@ -754,10 +752,8 @@ namespace realware
 
     void cOpenGLGraphicsAPI::ResizeRenderTargetDepth(cRenderTarget* renderTarget, const glm::vec2& size)
     {
-        cTexture attachmentCopy = *renderTarget->_depthAttachment;
+        cTexture* newDepthAttachment = CreateTexture(size.x, size.y, renderTarget->_depthAttachment->GetDepth(), renderTarget->_depthAttachment->GetDimension(), renderTarget->_depthAttachment->GetFormat(), nullptr);
         DestroyTexture(renderTarget->_depthAttachment);
-
-        cTexture* newDepthAttachment = CreateTexture(size.x, size.y, attachmentCopy._depth, attachmentCopy._type, attachmentCopy._format, nullptr);
         renderTarget->_depthAttachment = newDepthAttachment;
 
         GLenum buffs[16] = {};

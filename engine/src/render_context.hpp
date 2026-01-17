@@ -82,10 +82,10 @@ namespace realware
     {
         REALWARE_CLASS(cTexture)
 
-        friend class cOpenGLGraphicsAPI;
+            friend class cOpenGLGraphicsAPI;
 
     public:
-        enum class eType
+        enum class eDimension
         {
             NONE = 0,
             TEXTURE_2D = 1,
@@ -107,17 +107,16 @@ namespace realware
         inline types::usize GetWidth() const { return _width; }
         inline types::usize GetHeight() const { return _height; }
         inline types::usize GetDepth() const { return _depth; }
-        inline eType GetTextureType() const { return _type; }
+        inline eDimension GetDimension() const { return _dimension; }
         inline eFormat GetFormat() const { return _format; }
         inline types::s32 GetSlot() const { return _slot; }
-
         inline void SetSlot(types::s32 slot) { _slot = slot; }
 
     private:
         types::usize _width = 0;
         types::usize _height = 0;
         types::usize _depth = 0;
-        eType _type = eType::NONE;
+        eDimension _dimension = eDimension::NONE;
         eFormat _format = eFormat::NONE;
         types::s32 _slot = -1;
     };
@@ -167,7 +166,7 @@ namespace realware
         eFactor _dstFactors[8] = { eFactor::ZERO };
     };
 
-    class cRenderPass
+    class cRenderPass : public cFactoryObject
     {
         REALWARE_CLASS(cRenderPass)
 
@@ -227,7 +226,7 @@ namespace realware
         virtual void DestroyShader(cShader* shader) = 0;
         virtual void SetShaderUniform(const cShader* shader, const std::string& name, const glm::mat4& matrix) = 0;
         virtual void SetShaderUniform(const cShader* shader, const std::string& name, types::usize count, const types::f32* values) = 0;
-        virtual cTexture* CreateTexture(types::usize width, types::usize height, types::usize depth, cTexture::eType type, cTexture::eFormat format, const void* data) = 0;
+        virtual cTexture* CreateTexture(types::usize width, types::usize height, types::usize depth, cTexture::eDimension dimension, cTexture::eFormat format, const void* data) = 0;
         virtual cTexture* ResizeTexture(cTexture* texture, const glm::vec2& size) = 0;
         virtual void BindTexture(const cShader* shader, const std::string& name, const cTexture* texture, types::s32 slot) = 0;
         virtual void UnbindTexture(const cTexture* texture) = 0;
@@ -286,7 +285,7 @@ namespace realware
         virtual void DestroyShader(cShader* shader) override final;
         virtual void SetShaderUniform(const cShader* shader, const std::string& name, const glm::mat4& matrix) override final;
         virtual void SetShaderUniform(const cShader* shader, const std::string& name, types::usize count, const types::f32* values) override final;
-        virtual cTexture* CreateTexture(types::usize width, types::usize height, types::usize depth, cTexture::eType type, cTexture::eFormat format, const void* data) override final;
+        virtual cTexture* CreateTexture(types::usize width, types::usize height, types::usize depth, cTexture::eDimension dimension, cTexture::eFormat format, const void* data) override final;
         virtual cTexture* ResizeTexture(cTexture* texture, const glm::vec2& size) override final;
         virtual void BindTexture(const cShader* shader, const std::string& name, const cTexture* texture, types::s32 slot) override final;
         virtual void UnbindTexture(const cTexture* texture) override final;

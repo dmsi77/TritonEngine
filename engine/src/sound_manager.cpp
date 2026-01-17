@@ -9,22 +9,6 @@ using namespace types;
 
 namespace realware
 {
-    cSound::cSound(cContext* context, u32 source, u32 buffer) : cFactoryObject(context), _source(source), _buffer(buffer) {}
-
-    cSound::~cSound()
-    {
-        if (_file != nullptr)
-        {
-            if (_format == eCategory::SOUND_FORMAT_WAV)
-            {
-                cMemoryPool* memoryPool = GetApplication()->GetMemoryPool();
-                memoryPool->Free(_file->_data);
-                _file->~sWAVStructure();
-                memoryPool->Free(_file);
-            }
-        }
-    }
-
     mSound::mSound(cContext* context, iSoundContext* soundContext) : iObject(context), _soundContext(soundContext), _sounds(app) {}
 
     cSound* mSound::CreateSound(const std::string& id, const std::string& filename, eCategory format)

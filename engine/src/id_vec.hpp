@@ -12,10 +12,10 @@ namespace realware
 	class cContext;
 
 	template <typename T>
-	class cIdVector : public iObject
+	class cIdVector : public cFactoryObject
 	{
 	public:
-		explicit cIdVector(cContext* context);
+		explicit cIdVector(cContext* context, types::usize maxElementCount);
 		~cIdVector();
 
 		template<typename... Args>
@@ -38,9 +38,9 @@ namespace realware
 	};
 
 	template <typename T>
-	cIdVector<T>::cIdVector(cContext* context) : iObject(context)
+	cIdVector<T>::cIdVector(cContext* context, types::usize maxElementCount) : cFactoryObject(context)
 	{
-		_maxElementCount = app->GetDesc()->_maxVectorElementCount;
+		_maxElementCount = maxElementCount;
 		_indexCount = 0;
 		_indices = (types::s32*)std::malloc(sizeof(types::s32) * _maxElementCount);
 		_elements = (T*)std::malloc(sizeof(T) * _maxElementCount);
