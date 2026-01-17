@@ -21,11 +21,6 @@ namespace types
     using usize = size_t;
     using dword = u32;
     using qword = u64;
-    using boolean = qword;
-
-    constexpr boolean K_TRUE = 1;
-    constexpr boolean K_FALSE = 0;
-    constexpr usize K_USIZE_MAX = SIZE_MAX;
 
 #if defined(__ILP32__) || defined(__arm__) || defined(_M_ARM) || defined(__i386__) || defined(_M_IX86) || defined(_X86_)
     // 32-bit architecture
@@ -39,6 +34,12 @@ namespace types
     // Unknown architecture
 #error Unknown architecture
 #endif
+
+    using boolean = cpuword;
+
+    constexpr boolean K_TRUE = 1;
+    constexpr boolean K_FALSE = 0;
+    constexpr usize K_USIZE_MAX = SIZE_MAX;
 }
 
 #endif
