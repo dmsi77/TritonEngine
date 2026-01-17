@@ -8,6 +8,8 @@
 
 namespace realware
 {
+	class iApplication;
+
 	struct sEngineCapabilities
 	{
 		std::string windowTitle = "Test app";
@@ -20,19 +22,21 @@ namespace realware
 		types::usize maxPhysicsControllerCount = 8;
 	};
 
-	class cEngine : public iObject
+	class cEngine : public cFactoryObject
 	{
 		REALWARE_CLASS(cEngine)
 
 	public:
-		explicit cEngine(cContext* context, const sEngineCapabilities* capabilities);
+		explicit cEngine(cContext* context, const sEngineCapabilities* capabilities, iApplication* app);
 		virtual ~cEngine() = default;
 
 		void Initialize();
+		void Run();
 
 		const sEngineCapabilities* GetCapabilities() const { return _capabilities; }
 
 	private:
 		const sEngineCapabilities* _capabilities = nullptr;
+		iApplication* _app = nullptr;
 	};
 }

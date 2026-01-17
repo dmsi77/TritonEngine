@@ -1,6 +1,7 @@
 // engine.cpp
 
 #include "engine.hpp"
+#include "application.hpp"
 #include "context.hpp"
 #include "graphics.hpp"
 #include "input.hpp"
@@ -16,9 +17,11 @@
 #include "render_context.hpp"
 #include "audio.hpp"
 
+using namespace types;
+
 namespace realware
 {
-	cEngine::cEngine(cContext* context, const sEngineCapabilities* capabilities) : iObject(context), _capabilities(capabilities) {}
+	cEngine::cEngine(cContext* context, const sEngineCapabilities* capabilities, iApplication* app) : iObject(context), _capabilities(capabilities), _app(app) {}
 
 	void cEngine::Initialize()
 	{
@@ -59,5 +62,37 @@ namespace realware
 		// Create sound context
 		cAudio* audio = _context->GetSubsystem<cAudio>();
 		audio->SetAPI(cAudio::API::OAL);
+	}
+
+	void cEngine::Run()
+	{
+		if (_app == nullptr)
+			return;
+
+		_app->Setup();
+
+		auto gfx = _context->GetSubsystem<cGraphics>();
+		auto input = _context->GetSubsystem<cInput>();
+		auto camera = _context->GetSubsystem<cCamera>();
+		auto time = _context->GetSubsystem<cTime>();
+		auto physics = _context->GetSubsystem<cPhysics>();
+
+		cWindow* window = _app->GetWindow();
+
+		time->BeginFrame();
+
+		while (window->GetRunState() == K_FALSE)
+		{
+			time->Update();
+			physics->Simulate();
+			camera->Update();
+			gfx->CompositeFinal();
+			input->SwapBuffers();
+			input->PollEvents();
+		}
+
+		time->EndFrame();
+
+		_app->Stop();
 	}
 }
