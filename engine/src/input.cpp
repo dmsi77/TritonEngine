@@ -71,57 +71,6 @@ namespace realware
             input->SetMouseKey(button, 1);
     }
 
-    cWindow::cWindow(cContext* context, const std::string& title, types::usize width, types::usize height) : iObject(context), _title(title)
-    {
-        if (context->GetSubsystem<cInput>()->_initialized == K_FALSE)
-            return;
-
-        glm::vec2 windowSize = glm::vec2(width, height);
-
-        if (fullscreen == K_FALSE)
-        {
-            _window = glfwCreateWindow(windowSize.x, windowSize.y, _title.c_str(), nullptr, nullptr);
-        }
-        else
-        {
-            glfwWindowHint(GLFW_DECORATED, 0);
-
-            windowSize = GetMonitorSize();
-            _window = glfwCreateWindow(windowSize.x, windowSize.y, _title.c_str(), glfwGetPrimaryMonitor(), nullptr);
-        }
-
-        if (!_window)
-        {
-            Print("Error: incompatible GL version!");
-            return;
-        }
-
-        _width = windowSize.x;
-        _height = windowSize.y;
-
-        glfwSetWindowUserPointer(_window, _context);
-
-        glfwMakeContextCurrent(_window);
-
-        glfwSwapInterval(1);
-
-        glfwSetKeyCallback(_window, &KeyCallback);
-        glfwSetWindowFocusCallback(_window, &WindowFocusCallback);
-        glfwSetWindowSizeCallback(_window, &WindowSizeCallback);
-        glfwSetCursorPosCallback(_window, &CursorCallback);
-        glfwSetMouseButtonCallback(_window, &MouseButtonCallback);
-    }
-
-    types::boolean cWindow::GetRunState() const
-    {
-        return glfwWindowShouldClose(_window);
-    }
-
-    HWND cWindow::GetWin32Window() const
-    {
-        return glfwGetWin32Window(_window);
-    }
-    
     cInput::cInput(cContext* context) : iObject(context)
     {
         if (_initialized == types::K_FALSE)
