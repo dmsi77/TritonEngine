@@ -24,9 +24,9 @@ namespace realware
     struct sTransform;
     struct sText;
     
-    class cGameObject : public cFactoryObject
+    class cGameObject : public cObject
     {
-        REALWARE_CLASS(cGameObject)
+        REALWARE_OBJECT(cGameObject)
 
         friend class mGameObject;
 
@@ -74,7 +74,7 @@ namespace realware
         cPhysicsController* _controller = nullptr;
     };
 
-    class mGameObject : public iObject
+    class mGameObject : public cObject
     {
     public:
         explicit mGameObject(cContext* context);

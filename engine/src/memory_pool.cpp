@@ -31,7 +31,7 @@ namespace realware
 
 			for (usize i = 0; i < bin->_maxBlockCount; i++)
 			{
-				cFactoryObject* obj = (cFactoryObject*)((u8*)bin->_blocks + bin->_blockSize * i);
+				cObject* obj = (cObject*)((u8*)bin->_blocks + bin->_blockSize * i);
 
 				if (obj->_occupied == K_FALSE)
 				{
@@ -54,7 +54,7 @@ namespace realware
 		if (ptr == nullptr)
 			return;
 
-		cFactoryObject* obj = (cFactoryObject*)ptr;
+		cObject* obj = (cObject*)ptr;
 		obj->_occupied = K_FALSE;
 	}
 

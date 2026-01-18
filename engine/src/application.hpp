@@ -31,9 +31,9 @@ namespace realware
     class cEngine;
     struct sEngineCapabilities;
 
-    class cWindow : public cFactoryObject
+    class cWindow : public cObject
     {
-        REALWARE_CLASS(cWindow)
+        REALWARE_OBJECT(cWindow)
 
         friend void WindowSizeCallback(GLFWwindow* window, int width, int height);
 
@@ -57,9 +57,9 @@ namespace realware
         types::boolean _fullscreen = types::K_FALSE;
     };
 
-    class iApplication : public iObject
+    class iApplication : public cObject
     {
-        REALWARE_CLASS(iApplication)
+        REALWARE_OBJECT(iApplication)
 
     public:
         enum class eMouseButton

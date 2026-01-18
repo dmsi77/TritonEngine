@@ -6,7 +6,7 @@
 
 namespace realware
 {
-    cDataBuffer::cDataBuffer(cContext* context) : cFactoryObject(context) {}
+    cDataBuffer::cDataBuffer(cContext* context) : cObject(context) {}
 
     cDataBuffer::~cDataBuffer()
     {

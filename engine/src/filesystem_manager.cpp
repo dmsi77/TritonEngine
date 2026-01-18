@@ -15,7 +15,7 @@ using namespace types;
 
 namespace realware
 {
-    cDataFile::cDataFile(cContext* context) : cFactoryObject(context) {}
+    cDataFile::cDataFile(cContext* context) : cObject(context) {}
 
     cDataFile::~cDataFile()
     {
@@ -46,7 +46,7 @@ namespace realware
         inputFile.read((char*)&_data[0], byteSize);
     }
 
-    cFileSystem::cFileSystem(cContext* context) : iObject(context) {}
+    cFileSystem::cFileSystem(cContext* context) : cObject(context) {}
 
     cDataFile* cFileSystem::CreateDataFile(const std::string& path, types::boolean isText)
     {

@@ -11,7 +11,7 @@ using namespace types;
 
 namespace realware
 {
-	cSound::cSound(cContext* context) : cFactoryObject(context), _audioBackend(context->GetSubsystem<cAudio>()->GetAPI()) {}
+	cSound::cSound(cContext* context) : cObject(context), _audioBackend(context->GetSubsystem<cAudio>()->GetAPI()) {}
 
 	cSound::~cSound()
 	{
@@ -84,7 +84,7 @@ namespace realware
 		}
 	}
 
-	cAudio::cAudio(cContext* context) : iObject(context) {}
+	cAudio::cAudio(cContext* context) : cObject(context) {}
 
 	cAudio::~cAudio()
 	{

@@ -77,12 +77,12 @@ namespace realware
 		virtual void onAdvance(const physx::PxRigidBody* const* bodyBuffer, const physx::PxTransform* poseBuffer, const physx::PxU32 count) override final {}
     };
 
-    class cPhysicsScene : public cFactoryObject
+    class cPhysicsScene : public cObject
     {
-        REALWARE_CLASS(cPhysicsScene)
+        REALWARE_OBJECT(cPhysicsScene)
 
     public:
-        explicit cPhysicsScene(cContext* context, physx::PxScene* scene, physx::PxControllerManager* controllerManager) : cFactoryObject(context), _scene(scene), _controllerManager(controllerManager) {}
+        explicit cPhysicsScene(cContext* context, physx::PxScene* scene, physx::PxControllerManager* controllerManager) : cObject(context), _scene(scene), _controllerManager(controllerManager) {}
         ~cPhysicsScene() = default;
 
         inline physx::PxScene* GetScene() const { return _scene; }
@@ -93,12 +93,12 @@ namespace realware
         physx::PxControllerManager* _controllerManager = nullptr;
     };
 
-    class cPhysicsMaterial : public cFactoryObject
+    class cPhysicsMaterial : public cObject
     {
-        REALWARE_CLASS(cPhysicsMaterial)
+        REALWARE_OBJECT(cPhysicsMaterial)
 
     public:
-        explicit cPhysicsMaterial(cContext* context, physx::PxMaterial* material) : cFactoryObject(context), _material(material) {}
+        explicit cPhysicsMaterial(cContext* context, physx::PxMaterial* material) : cObject(context), _material(material) {}
         ~cPhysicsMaterial() = default;
 
         inline physx::PxMaterial* GetMaterial() const { return _material; }
@@ -107,12 +107,12 @@ namespace realware
         physx::PxMaterial* _material = nullptr;
     };
 
-    class cPhysicsController : public cFactoryObject
+    class cPhysicsController : public cObject
     {
-        REALWARE_CLASS(cPhysicsController)
+        REALWARE_OBJECT(cPhysicsController)
 
     public:
-        explicit cPhysicsController(cContext* context, physx::PxController* controller, types::f32 eyeHeight) : cFactoryObject(context), _controller(controller), _eyeHeight(eyeHeight) {}
+        explicit cPhysicsController(cContext* context, physx::PxController* controller, types::f32 eyeHeight) : cObject(context), _controller(controller), _eyeHeight(eyeHeight) {}
         ~cPhysicsController() = default;
 
         inline physx::PxController* GetController() const { return _controller; }
@@ -123,12 +123,12 @@ namespace realware
         types::f32 _eyeHeight = 0.0f;
     };
 
-    class cPhysicsActor : public cFactoryObject
+    class cPhysicsActor : public cObject
     {
-        REALWARE_CLASS(cPhysicsActor)
+        REALWARE_OBJECT(cPhysicsActor)
 
     public:
-        explicit cPhysicsActor(cContext* context, cGameObject* gameObject, physx::PxActor* actor, eCategory actorType) : cFactoryObject(context), _gameObject(gameObject), _actor(actor), _type(actorType) {}
+        explicit cPhysicsActor(cContext* context, cGameObject* gameObject, physx::PxActor* actor, eCategory actorType) : cObject(context), _gameObject(gameObject), _actor(actor), _type(actorType) {}
         ~cPhysicsActor() = default;
 
         inline cGameObject* GetGameObject() const { return _gameObject; }
@@ -141,9 +141,9 @@ namespace realware
         eCategory _type = eCategory::PHYSICS_ACTOR_DYNAMIC;
     };
 
-    class cPhysics : public iObject
+    class cPhysics : public cObject
     {
-        REALWARE_CLASS(cPhysics)
+        REALWARE_OBJECT(cPhysics)
 
     public:
         explicit cPhysics(cContext* context);

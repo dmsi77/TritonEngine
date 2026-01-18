@@ -18,7 +18,7 @@ namespace realware
         _function->operator()(data);
     };
 
-    cEventDispatcher::cEventDispatcher(cContext* context) : iObject(context) {}
+    cEventDispatcher::cEventDispatcher(cContext* context) : cObject(context) {}
 
     void cEventDispatcher::Unsubscribe(eEventType type, cGameObject* receiver)
     {

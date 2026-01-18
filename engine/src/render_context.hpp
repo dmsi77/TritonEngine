@@ -13,11 +13,10 @@ namespace realware
 {
     class cApplication;
     class cTextureAtlasTexture;
-    class cFactoryObject;
 
-    class cGPUResource : public cFactoryObject
+    class cGPUResource : public cObject
     {
-        REALWARE_CLASS(cGPUResource)
+        REALWARE_OBJECT(cGPUResource)
         
     protected:
         mutable types::u32 _instance = 0;
@@ -26,7 +25,7 @@ namespace realware
 
     class cBuffer : public cGPUResource
     {
-        REALWARE_CLASS(cBuffer)
+        REALWARE_OBJECT(cBuffer)
 
         friend class cOpenGLGraphicsAPI;
 
@@ -52,14 +51,14 @@ namespace realware
 
     class cVertexArray : public cGPUResource
     {
-        REALWARE_CLASS(cVertexArray)
+        REALWARE_OBJECT(cVertexArray)
 
         friend class cOpenGLGraphicsAPI;
     };
 
     class cShader : public cGPUResource
     {
-        REALWARE_CLASS(cShader)
+        REALWARE_OBJECT(cShader)
 
         friend class cOpenGLGraphicsAPI;
 
@@ -80,9 +79,9 @@ namespace realware
 
     class cTexture : public cGPUResource
     {
-        REALWARE_CLASS(cTexture)
+        REALWARE_OBJECT(cTexture)
 
-            friend class cOpenGLGraphicsAPI;
+        friend class cOpenGLGraphicsAPI;
 
     public:
         enum class eDimension
@@ -123,7 +122,7 @@ namespace realware
 
     class cRenderTarget : public cGPUResource
     {
-        REALWARE_CLASS(cRenderTarget)
+        REALWARE_OBJECT(cRenderTarget)
 
         friend class cOpenGLGraphicsAPI;
 
@@ -134,7 +133,7 @@ namespace realware
 
     class cDepthMode
     {
-        REALWARE_CLASS(cDepthMode)
+        REALWARE_OBJECT(cDepthMode)
 
         friend class cOpenGLGraphicsAPI;
 
@@ -145,7 +144,7 @@ namespace realware
 
     class cBlendMode
     {
-        REALWARE_CLASS(cBlendMode)
+        REALWARE_OBJECT(cBlendMode)
 
         friend class cOpenGLGraphicsAPI;
 
@@ -166,9 +165,9 @@ namespace realware
         eFactor _dstFactors[8] = { eFactor::ZERO };
     };
 
-    class cRenderPass : public cFactoryObject
+    class cRenderPass : public cObject
     {
-        REALWARE_CLASS(cRenderPass)
+        REALWARE_OBJECT(cRenderPass)
 
         friend class cOpenGLGraphicsAPI;
 
@@ -199,12 +198,12 @@ namespace realware
         sDescriptor _desc;
     };
 
-    class iGraphicsAPI : public iObject
+    class iGraphicsAPI : public cObject
     {
-        REALWARE_CLASS(iGraphicsAPI)
+        REALWARE_OBJECT(iGraphicsAPI)
 
     public:
-        explicit iGraphicsAPI(cContext* context) : iObject(context) {}
+        explicit iGraphicsAPI(cContext* context) : cObject(context) {}
         virtual ~iGraphicsAPI() = default;
 
         virtual cBuffer* CreateBuffer(types::usize byteSize, cBuffer::eType type, const void* data) = 0;
@@ -260,7 +259,7 @@ namespace realware
 
     class cOpenGLGraphicsAPI : public iGraphicsAPI
     {
-        REALWARE_CLASS(cOpenGLGraphicsAPI)
+        REALWARE_OBJECT(cOpenGLGraphicsAPI)
 
     public:
         explicit cOpenGLGraphicsAPI(cContext* context);

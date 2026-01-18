@@ -16,9 +16,9 @@ namespace realware
     class cApplication;
     class cTexture;
 
-    class cTextureAtlasTexture : public cFactoryObject
+    class cTextureAtlasTexture : public cObject
     {
-        REALWARE_CLASS(cTextureAtlasTexture)
+        REALWARE_OBJECT(cTextureAtlasTexture)
 
     public:
         cTextureAtlasTexture(cContext* context, types::boolean isNormalized, const glm::vec3& offset, const glm::vec2& size, cTexture* atlas = nullptr);
@@ -40,9 +40,9 @@ namespace realware
         types::f32 _textureLayerInfo = 0.0f;
     };
 
-    class cTextureAtlas : public iObject
+    class cTextureAtlas : public cObject
     {
-        REALWARE_CLASS(cTextureAtlas)
+        REALWARE_OBJECT(cTextureAtlas)
 
     public:
         explicit cTextureAtlas(cContext* context);

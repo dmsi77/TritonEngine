@@ -38,9 +38,9 @@ namespace realware
         mutable std::shared_ptr<EventFunction> _function;
     };
 
-    class cEventDispatcher : public iObject
+    class cEventDispatcher : public cObject
     {
-        REALWARE_CLASS(cEventDispatcher)
+        REALWARE_OBJECT(cEventDispatcher)
 
     public:
         explicit cEventDispatcher(cContext* context);

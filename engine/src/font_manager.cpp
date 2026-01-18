@@ -30,7 +30,7 @@ namespace realware
             return 0;
     }
 
-    cFontFace::cFontFace(cContext* context) : cFactoryObject(context) {}
+    cFontFace::cFontFace(cContext* context) : cObject(context) {}
 
     cFontFace::~cFontFace()
     {
@@ -159,11 +159,11 @@ namespace realware
         memoryAllocator->Deallocate(atlasPixels);
     }
 
-    cText::cText(cContext* context) : cFactoryObject(context) {}
+    cText::cText(cContext* context) : cObject(context) {}
 
     cText::~cText() {}
 
-    cFont::cFont(cContext* context) : iObject(context), _gfx(context->GetSubsystem<cGraphics>()->GetAPI())
+    cFont::cFont(cContext* context) : cObject(context), _gfx(context->GetSubsystem<cGraphics>()->GetAPI())
     {
         if (FT_Init_FreeType(&_lib))
         {

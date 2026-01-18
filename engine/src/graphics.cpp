@@ -81,7 +81,7 @@ namespace realware
         );
     }
 
-    cGraphics::cGraphics(cContext* context) : iObject(context), _materialsCPU(context)
+    cGraphics::cGraphics(cContext* context) : cObject(context), _materialsCPU(context)
     {
         cMemoryPool* memoryPool = app->GetMemoryPool();
 

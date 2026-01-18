@@ -1,0 +1,63 @@
+// factory.hpp
+
+#pragma once
+
+#include <string>
+#include "log.hpp"
+#include "context.hpp"
+#include "memory_pool.hpp"
+#include "engine.hpp"
+#include "types.hpp"
+
+namespace realware
+{
+	class cContext;
+
+	template <typename T>
+	class cFactory
+	{
+	public:
+		explicit cFactory(cContext* context) = default;
+		~cFactory() = default;
+
+		template <typename... Args>
+		T* Create(Args&&... args);
+		void Destroy(T* object);
+
+	private:
+		types::usize _counter = 0;
+	};
+
+	template <typename T>
+	template <typename... Args>
+	T* cFactory<T>::Create(Args&&... args)
+	{
+		if (_counter >= types::K_USIZE_MAX)
+		{
+			Print("Error: can't create object of type '" + T::GetType() + "'!");
+
+			return nullptr;
+		}
+		
+		const sEngineCapabilities* caps = _context->GetSubsystem<cEngine>()->GetCapabilities();
+		cMemoryAllocator* memoryAllocator = _context->GetMemoryAllocator();
+
+		const types::usize objectByteSize = sizeof(T);
+		T* object = (T*)memoryAllocator->Allocate(objectByteSize, caps->memoryAlignment);
+		new (object) T(std::forward<Args>(args)...);
+		
+		const std::string id = object->GetType() + std::to_string(_counter++);
+		object->_identifier = new cIdentifier(id);
+
+		return object;
+	}
+
+	template <typename T>
+	void cFactory<T>::Destroy(T* object)
+	{
+		cMemoryAllocator* memoryAllocator = _context->GetMemoryAllocator();
+
+		object->~T();
+		memoryAllocator->Deallocate(object);
+	}
+}

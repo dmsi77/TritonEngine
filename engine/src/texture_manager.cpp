@@ -14,7 +14,7 @@ using namespace types;
 
 namespace realware
 {
-    cTextureAtlasTexture::cTextureAtlasTexture(cContext* context, types::boolean isNormalized, const glm::vec3& offset, const glm::vec2& size, cTexture* atlas = nullptr) : cFactoryObject(context), _isNormalized(isNormalized)
+    cTextureAtlasTexture::cTextureAtlasTexture(cContext* context, types::boolean isNormalized, const glm::vec3& offset, const glm::vec2& size, cTexture* atlas = nullptr) : cObject(context), _isNormalized(isNormalized)
     {
         if (isNormalized == K_TRUE)
         {
@@ -28,7 +28,7 @@ namespace realware
         }
     }
 
-    cTextureAtlas::cTextureAtlas(cContext* context) : iObject(context), _textures(context), _gfx(_context->GetSubsystem<cGraphics>()->GetAPI()) {}
+    cTextureAtlas::cTextureAtlas(cContext* context) : cObject(context), _textures(context), _gfx(_context->GetSubsystem<cGraphics>()->GetAPI()) {}
 
     cTextureAtlas::~cTextureAtlas()
     {

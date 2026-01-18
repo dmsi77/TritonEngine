@@ -7,8 +7,10 @@
 
 namespace realware
 {
-    class cDataBuffer : public cFactoryObject
+    class cDataBuffer : public cObject
     {
+        REALWARE_OBJECT(cDataBuffer)
+
     public:
         explicit cDataBuffer(cContext* context);
         virtual ~cDataBuffer() override;

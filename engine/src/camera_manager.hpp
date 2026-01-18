@@ -11,9 +11,9 @@ namespace realware
 {
     struct sTransform;
 
-    class cCamera : public iObject
+    class cCamera : public cObject
     {
-        REALWARE_CLASS(cCamera)
+        REALWARE_OBJECT(cCamera)
 
     public:
         explicit cCamera(cContext* context);

@@ -10,13 +10,13 @@
 
 namespace realware
 {
-	class cTime : public iObject
+	class cTime : public cObject
 	{
-		REALWARE_CLASS(cTime)
+		REALWARE_OBJECT(cTime)
 
 	public:
 		explicit cTime(cContext* context);
-		virtual ~cTime() = default;
+		virtual ~cTime() override final = default;
 
 		void BeginFrame();
 		void Update();

@@ -17,7 +17,7 @@ using namespace types;
 
 namespace realware
 {
-    cCamera::cCamera(cContext* context) : iObject(context), _transform(_context->Create<sTransform>()) {}
+    cCamera::cCamera(cContext* context) : cObject(context), _transform(_context->Create<sTransform>()) {}
 
     void cCamera::Update()
     {

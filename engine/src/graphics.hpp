@@ -82,12 +82,12 @@ namespace realware
         glm::mat4 _world = glm::mat4(1.0f);
     };
 
-    class cMaterial : public cFactoryObject
+    class cMaterial : public cObject
     {
-        REALWARE_CLASS(cMaterial)
+        REALWARE_OBJECT(cMaterial)
 
     public:
-        explicit cMaterial(cContext* context, cTextureAtlasTexture* diffuseTexture, const glm::vec4& diffuseColor, const glm::vec4& highlightColor, sShader* customShader) : cFactoryObject(context), _diffuseTexture(diffuseTexture), _diffuseColor(diffuseColor), _highlightColor(highlightColor), _customShader(customShader) {}
+        explicit cMaterial(cContext* context, cTextureAtlasTexture* diffuseTexture, const glm::vec4& diffuseColor, const glm::vec4& highlightColor, sShader* customShader) : cObject(context), _diffuseTexture(diffuseTexture), _diffuseColor(diffuseColor), _highlightColor(highlightColor), _customShader(customShader) {}
         ~cMaterial() = default;
 
         inline sShader* GetCustomShader() const { return _customShader; }
@@ -144,9 +144,9 @@ namespace realware
         glm::vec4 _attenuation = glm::vec4(0.0f);
     };
 
-	class cGraphics : public iObject
+	class cGraphics : public cObject
 	{
-        REALWARE_CLASS(cGraphics)
+        REALWARE_OBJECT(cGraphics)
 
 	public:
 		enum class API

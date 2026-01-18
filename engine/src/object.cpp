@@ -8,24 +8,24 @@ namespace realware
 {
 	cIdentifier::cIdentifier(const std::string& id) : _id(id) {}
 
-    cFactoryObject::~cFactoryObject()
+    cObject::~cObject()
     {
         delete _identifier;
     }
 
-    void cFactoryObject::Unsubscribe(eEventType type, cGameObject* receiver)
+    void cObject::Unsubscribe(eEventType type, cGameObject* receiver)
     {
         cEventDispatcher* dispatcher = _context->GetSubsystem<cEventDispatcher>();
         dispatcher->Unsubscribe(type, receiver);
     }
 
-    void cFactoryObject::Send(eEventType type)
+    void cObject::Send(eEventType type)
     {
         cEventDispatcher* dispatcher = _context->GetSubsystem<cEventDispatcher>();
         dispatcher->Send(type);
     }
 
-    void cFactoryObject::Send(eEventType type, cDataBuffer* data)
+    void cObject::Send(eEventType type, cDataBuffer* data)
     {
         cEventDispatcher* dispatcher = _context->GetSubsystem<cEventDispatcher>();
         dispatcher->Send(type, data);

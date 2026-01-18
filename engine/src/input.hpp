@@ -14,9 +14,9 @@ namespace realware
 {
 	class cContext;
 
-	class cInput : public iObject
+	class cInput : public cObject
 	{
-        REALWARE_CLASS(cInput)
+        REALWARE_OBJECT(cInput)
 
         friend class cWindow;
         friend void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);

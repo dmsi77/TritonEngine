@@ -30,9 +30,9 @@ namespace realware
         void* _bitmapData = nullptr;
     };
 
-    class cFontFace : public cFactoryObject
+    class cFontFace : public cObject
     {
-        REALWARE_CLASS(cFontFace)
+        REALWARE_OBJECT(cFontFace)
 
     public:
         explicit cFontFace(cContext* context);
@@ -64,9 +64,9 @@ namespace realware
         cTexture* _atlas = nullptr;
     };
 
-    class cText : public cFactoryObject
+    class cText : public cObject
     {
-        REALWARE_CLASS(cText)
+        REALWARE_OBJECT(cText)
 
     public:
         explicit cText(cContext* context);
@@ -80,13 +80,13 @@ namespace realware
         std::string _text = "";
     };
 
-    class cFont : public iObject
+    class cFont : public cObject
     {
-        REALWARE_CLASS(cFont)
+        REALWARE_OBJECT(cFont)
 
     public:
-        cFont(cContext* context);
-        ~cFont();
+        explicit cFont(cContext* context);
+        virtual ~cFont() override final;
 
         cFontFace* CreateFontTTF(const std::string& filename, types::usize glyphSize);
         cText* CreateText(cFontFace* font, const std::string& text);

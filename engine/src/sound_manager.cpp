@@ -9,7 +9,7 @@ using namespace types;
 
 namespace realware
 {
-    mSound::mSound(cContext* context, iSoundContext* soundContext) : iObject(context), _soundContext(soundContext), _sounds(app) {}
+    mSound::mSound(cContext* context, iSoundContext* soundContext) : cObject(context), _soundContext(soundContext), _sounds(app) {}
 
     cSound* mSound::CreateSound(const std::string& id, const std::string& filename, eCategory format)
     {

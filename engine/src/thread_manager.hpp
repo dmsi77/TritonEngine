@@ -20,8 +20,6 @@ namespace realware
 
     class cTask
     {
-        REALWARE_CLASS(cTask)
-
     public:
         cTask() = default;
         explicit cTask(cBuffer* data, TaskFunction&& function);
@@ -36,9 +34,9 @@ namespace realware
         std::shared_ptr<TaskFunction> _function;
     };
 
-    class cThread : public iObject
+    class cThread : public cObject
     {
-        REALWARE_CLASS(cThread)
+        REALWARE_OBJECT(cThread)
 
     public:
         explicit cThread(cContext* context, types::usize threadCount = std::thread::hardware_concurrency());

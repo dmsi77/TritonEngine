@@ -35,7 +35,7 @@ namespace realware
     }
 
     cPhysics::cPhysics(cContext* context) :
-        iObject(context),
+        cObject(context),
         _allocator(new cPhysicsAllocator()),
         _error(new cPhysicsError()),
         _cpuDispatcher(new cPhysicsCPUDispatcher()),

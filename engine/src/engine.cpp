@@ -21,7 +21,7 @@ using namespace types;
 
 namespace realware
 {
-	cEngine::cEngine(cContext* context, const sEngineCapabilities* capabilities, iApplication* app) : cFactoryObject(context), _capabilities(capabilities), _app(app) {}
+	cEngine::cEngine(cContext* context, const sEngineCapabilities* capabilities, iApplication* app) : cObject(context), _capabilities(capabilities), _app(app) {}
 
 	void cEngine::Initialize()
 	{

@@ -10,7 +10,7 @@ using namespace types;
 
 namespace realware
 {
-    cGameObject::cGameObject(cContext* context) : cFactoryObject(context)
+    cGameObject::cGameObject(cContext* context) : cObject(context)
     {
         sTransform* pTransform = (sTransform*)(memoryPool->Allocate(sizeof(sTransform)));
         _transform = new (pTransform) sTransform();
@@ -46,7 +46,7 @@ namespace realware
         );
     }
 
-    mGameObject::mGameObject(cContext* context) : iObject(context), _maxGameObjectCount(app->GetDesc()->_maxGameObjectCount), _gameObjects(app) {}
+    mGameObject::mGameObject(cContext* context) : cObject(context), _maxGameObjectCount(app->GetDesc()->_maxGameObjectCount), _gameObjects(app) {}
 
     cGameObject* mGameObject::CreateGameObject(const std::string& id)
     {

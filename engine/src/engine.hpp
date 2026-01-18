@@ -8,6 +8,7 @@
 
 namespace realware
 {
+	class cContext;
 	class iApplication;
 
 	struct sEngineCapabilities
@@ -23,9 +24,9 @@ namespace realware
 		types::usize maxPhysicsControllerCount = 8;
 	};
 
-	class cEngine : public cFactoryObject
+	class cEngine : public cObject
 	{
-		REALWARE_CLASS(cEngine)
+		REALWARE_OBJECT(cEngine)
 
 	public:
 		explicit cEngine(cContext* context, const sEngineCapabilities* capabilities, iApplication* app);

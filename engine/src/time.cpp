@@ -4,7 +4,7 @@
 
 namespace realware
 {
-	cTime::cTime(cContext* context) : iObject(context) {}
+	cTime::cTime(cContext* context) : cObject(context) {}
 
 	void cTime::BeginFrame()
 	{

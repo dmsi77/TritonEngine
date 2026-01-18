@@ -18,12 +18,12 @@ namespace realware
     class cSound;
     struct sWAVStructure;
 
-    class iSoundAPI : public iObject
+    class iSoundAPI : public cObject
     {
-        REALWARE_CLASS(iSoundAPI)
+        REALWARE_OBJECT(iSoundAPI)
 
     public:
-        explicit iSoundAPI(cContext* context) : iObject(context) {}
+        explicit iSoundAPI(cContext* context) : cObject(context) {}
         virtual ~iSoundAPI() = default;
 
         virtual void Create(cSound::eFormat type, cSound* sound) = 0;
@@ -39,7 +39,7 @@ namespace realware
 
     class cOpenALSoundAPI : public iSoundAPI
     {
-        REALWARE_CLASS(cOpenALSoundAPI)
+        REALWARE_OBJECT(cOpenALSoundAPI)
 
     public:
         cOpenALSoundAPI(cContext* context);

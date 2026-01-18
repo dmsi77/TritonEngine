@@ -29,9 +29,9 @@ namespace realware
 		types::u32 _numSamples = 0;
 	};
 
-	class cSound : public cFactoryObject
+	class cSound : public cObject
 	{
-		REALWARE_CLASS(cSound)
+		REALWARE_OBJECT(cSound)
 
 	public:
 		enum class eFormat
@@ -68,9 +68,9 @@ namespace realware
 		types::u32 _buffer = 0;
 	};
 
-	class cAudio : public iObject
+	class cAudio : public cObject
 	{
-		REALWARE_CLASS(cAudio)
+		REALWARE_OBJECT(cAudio)
 
 	public:
 		enum class API

@@ -12,8 +12,6 @@ namespace realware
 
 	class cContext
 	{
-		REALWARE_CLASS(cContext)
-
 	public:
 		explicit cContext() = default;
 		~cContext() = default;
@@ -29,7 +27,7 @@ namespace realware
 		template <typename T>
 		void RegisterFactory();
 
-		void RegisterSubsystem(iObject* object);
+		void RegisterSubsystem(cObject* object);
 
 		inline cMemoryAllocator* GetMemoryAllocator() const { return _allocator; }
 
@@ -41,8 +39,8 @@ namespace realware
 
 	private:
 		cMemoryAllocator* _allocator = nullptr;
-		std::unordered_map<ClassType, std::shared_ptr<iObject>> _factories;
-		std::unordered_map<ClassType, std::shared_ptr<iObject>> _subsystems;
+		std::unordered_map<ClassType, std::shared_ptr<cObject>> _factories;
+		std::unordered_map<ClassType, std::shared_ptr<cObject>> _subsystems;
 	};
 
 	template <typename T, typename... Args>
@@ -71,7 +69,7 @@ namespace realware
 		const ClassType type = T::GetType();
 		const auto it = _factories.find(type);
 		if (it == _factories.end())
-			_factories.insert({type, std::make_shared<iObject>(this)});
+			_factories.insert({type, std::make_shared<cObject>(this)});
 	}
 
 	template <typename T>

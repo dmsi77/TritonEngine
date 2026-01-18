@@ -71,7 +71,7 @@ namespace realware
             input->SetMouseKey(button, 1);
     }
 
-    cInput::cInput(cContext* context) : iObject(context)
+    cInput::cInput(cContext* context) : cObject(context)
     {
         if (_initialized == types::K_FALSE)
         {

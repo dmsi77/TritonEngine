@@ -9,9 +9,9 @@ namespace realware
 {
     class cDataBuffer;
 
-    class cDataFile : public cFactoryObject
+    class cDataFile : public cObject
     {
-        REALWARE_CLASS(cDataFile)
+        REALWARE_OBJECT(cDataFile)
 
     public:
         explicit cDataFile(cContext* context);
@@ -25,8 +25,10 @@ namespace realware
         cDataBuffer* _data = nullptr;
     };
 
-    class cFileSystem : public iObject
+    class cFileSystem : public cObject
     {
+        REALWARE_OBJECT(cFileSystem)
+
     public:
         explicit cFileSystem(cContext* context);
         ~cFileSystem() = default;
