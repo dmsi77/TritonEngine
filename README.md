@@ -1,4 +1,6 @@
-# Gravebird Engine
+# Arachne Engine
+
+![Arachne Engine Logo](logo.png)
 
 Lightweight C++11 game engine.
 
