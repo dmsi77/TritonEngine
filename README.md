@@ -1,4 +1,4 @@
-# Ghost Engine
+# GhostWare
 
 Lightweight C++11 game engine.
 
