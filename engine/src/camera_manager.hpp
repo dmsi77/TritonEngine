@@ -7,7 +7,7 @@
 #include "object.hpp"
 #include "types.hpp"
 
-namespace ladon
+namespace harpy
 {
     struct sTransform;
 

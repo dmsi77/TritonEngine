@@ -15,7 +15,7 @@
 
 using namespace types;
 
-namespace ladon
+namespace harpy
 {
     cCamera::cCamera(cContext* context) : cObject(context), _transform(_context->Create<sTransform>()) {}
 

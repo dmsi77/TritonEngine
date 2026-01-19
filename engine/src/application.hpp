@@ -11,7 +11,7 @@
 #include "../../thirdparty/glm/glm/glm.hpp"
 #include "types.hpp"
 
-namespace ladon
+namespace harpy
 {
     class iRenderContext;
     class iSoundContext;

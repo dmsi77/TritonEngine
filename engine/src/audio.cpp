@@ -9,7 +9,7 @@
 
 using namespace types;
 
-namespace ladon
+namespace harpy
 {
 	cSound::cSound(cContext* context) : cObject(context), _audioBackend(context->GetSubsystem<cAudio>()->GetAPI()) {}
 

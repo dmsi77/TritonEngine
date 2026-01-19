@@ -4,7 +4,7 @@
 
 #include "buffer.hpp"
 
-namespace ladon
+namespace harpy
 {
     cDataBuffer::cDataBuffer(cContext* context) : cObject(context) {}
 

@@ -5,7 +5,7 @@
 #include "object.hpp"
 #include "types.hpp"
 
-namespace ladon
+namespace harpy
 {
     class cDataBuffer : public cObject
     {

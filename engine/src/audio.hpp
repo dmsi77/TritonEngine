@@ -6,7 +6,7 @@
 #include "id_vec.hpp"
 #include "types.hpp"
 
-namespace ladon
+namespace harpy
 {
 	class cContext;
 	class iSoundAPI;
