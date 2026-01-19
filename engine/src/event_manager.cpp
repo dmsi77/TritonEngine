@@ -3,6 +3,7 @@
 #pragma once
 
 #include "application.hpp"
+#include "context.hpp"
 #include "gameobject_manager.hpp"
 #include "event_manager.hpp"
 #include "buffer.hpp"
@@ -11,7 +12,7 @@ using namespace types;
 
 namespace harpy
 {
-    cEventHandler::cEventHandler(iObject* receiver, eEventType type, EventFunction&& function) : _receiver(receiver), _type(type), _function(std::make_shared<EventFunction>(std::move(function))) {}
+    cEventHandler::cEventHandler(cContext* context, iObject* receiver, eEventType type, EventFunction&& function) : iObject(context), _receiver(receiver), _type(type), _function(std::make_shared<EventFunction>(std::move(function))) {}
 
     void cEventHandler::Invoke(cDataBuffer* data)
     {
@@ -24,8 +25,12 @@ namespace harpy
     {
         const auto listener = _listeners.find(type);
         if (listener == _listeners.end())
-            _listeners.insert({ type, std::make_shared<cIdVector<cEventHandler>>() });
-        _listeners[type]->Add(receiver->GetID(), receiver, type, std::move(function));
+        {
+            const sApplicationCapabilities* caps = _context->GetSubsystem<cEngine>()->GetApplication()->GetCapabilities();
+            _listeners.insert({ type, std::make_shared<cIdVector<cEventHandler>>(_context, caps->maxEventPerTypeCount) });
+        }
+
+        _listeners[type]->Add(receiver->GetID(), _context, receiver, type, std::move(function));
     }
 
     void cEventDispatcher::Unsubscribe(iObject* receiver, eEventType type)

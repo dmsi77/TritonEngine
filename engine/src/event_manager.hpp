@@ -23,8 +23,8 @@ namespace harpy
         friend class mEvent;
 
     public:
-        cEventHandler(iObject* receiver, eEventType type, EventFunction&& function);
-        ~cEventHandler() = default;
+        explicit cEventHandler(cContext* context, iObject* receiver, eEventType type, EventFunction&& function);
+        virtual ~cEventHandler() override final = default;
 
         void Invoke(cDataBuffer* data);
         inline iObject* GetReceiver() const { return _receiver; }

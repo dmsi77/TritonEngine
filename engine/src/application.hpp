@@ -52,6 +52,7 @@ namespace harpy
         types::usize maxPhysicsActorCount = 8192;
         types::usize maxPhysicsControllerCount = 8;
         types::usize maxSoundCount = 65536;
+        types::usize maxEventPerTypeCount = 8192;
     };
 
     class iApplication : public iObject
