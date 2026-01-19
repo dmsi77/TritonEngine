@@ -660,7 +660,7 @@ namespace harpy
 
         if (texture->GetDimension() == cTexture::eDimension::TEXTURE_2D)
         {
-            const sEngineCapabilities* caps = _context->GetSubsystem<cEngine>()->GetCapabilities();
+            const sApplicationCapabilities* caps = _context->GetSubsystem<cEngine>()->GetApplication()->GetCapabilities();
             cMemoryAllocator* memoryAllocator = _context->GetMemoryAllocator();
 
             u8* pixels = (u8*)memoryAllocator->Allocate(texture->GetWidth() * texture->GetHeight() * formatByteCount, caps->memoryAlignment);

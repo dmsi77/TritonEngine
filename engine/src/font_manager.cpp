@@ -48,7 +48,7 @@ namespace harpy
 
     void cFontFace::FillAlphabetAndFindAtlasSize(usize& xOffset, usize& atlasWidth, usize& atlasHeight)
     {
-        const sEngineCapabilities* caps = _context->GetSubsystem<cEngine>()->GetCapabilities();
+        const sApplicationCapabilities* caps = _context->GetSubsystem<cEngine>()->GetApplication()->GetCapabilities();
         cMemoryAllocator* memoryAllocator = _context->GetMemoryAllocator();
 
         const FT_Face ftFont = _font;
@@ -104,7 +104,7 @@ namespace harpy
 
     void cFontFace::FillAtlasWithGlyphs(usize& atlasWidth, usize& atlasHeight)
     {
-        const sEngineCapabilities* caps = _context->GetSubsystem<cEngine>()->GetCapabilities();
+        const sApplicationCapabilities* caps = _context->GetSubsystem<cEngine>()->GetApplication()->GetCapabilities();
         cMemoryAllocator* memoryAllocator = _context->GetMemoryAllocator();
         iGraphicsAPI* gfx = _context->GetSubsystem<cGraphics>()->GetAPI();
 

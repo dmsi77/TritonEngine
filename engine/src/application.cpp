@@ -1,7 +1,9 @@
 // application.cpp
 
-#include <iostream>
 #include <GLFW/glfw3.h>
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3native.h>
+#include <iostream>
 #include "application.hpp"
 #include "engine.hpp"
 #include "graphics.hpp"
@@ -81,10 +83,10 @@ namespace harpy
         return glfwGetWin32Window(_window);
     }
 
-    iApplication::iApplication(cContext* context, const sEngineCapabilities* capabilities) : iObject(context)
+    iApplication::iApplication(cContext* context, const sApplicationCapabilities* caps) : iObject(context), _caps(caps)
     {
-        _engine = _context->Create<cEngine>(_context, capabilities, this);
-        _window = _context->Create<cWindow>(_context, capabilities->windowTitle, capabilities->windowWidth, capabilities->windowHeight, capabilities->fullscreen);
+        _engine = _context->Create<cEngine>(_context, caps, this);
+        _window = _context->Create<cWindow>(_context, caps->windowTitle, caps->windowWidth, caps->windowHeight, caps->fullscreen);
     }
 
     iApplication::~iApplication()

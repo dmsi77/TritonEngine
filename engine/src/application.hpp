@@ -2,34 +2,17 @@
 
 #pragma once
 
-#include <GLFW/glfw3.h>
-#define GLFW_EXPOSE_NATIVE_WIN32
-#include <GLFW/glfw3native.h>
 #include <windows.h>
 #include <chrono>
 #include "object.hpp"
 #include "../../thirdparty/glm/glm/glm.hpp"
 #include "types.hpp"
 
+struct GLFWwindow;
+
 namespace harpy
 {
-    class iRenderContext;
-    class iSoundContext;
-    class cRenderer;
-    class cFontManager;
-    class mCamera;
-    class mGameObject;
-    class mRender;
-    class mTexture;
-    class mSound;
-    class mFont;
-    class mPhysics;
-    class mFileSystem;
-    class mEvent;
-    class mThread;
-    class cWindow;
     class cEngine;
-    struct sEngineCapabilities;
 
     class cWindow : public iObject
     {
@@ -57,6 +40,20 @@ namespace harpy
         types::boolean _fullscreen = types::K_FALSE;
     };
 
+    struct sApplicationCapabilities
+    {
+        std::string windowTitle = "Test app";
+        types::usize windowWidth = 640;
+        types::usize windowHeight = 480;
+        types::boolean fullscreen = types::K_FALSE;
+        types::usize memoryAlignment = 64;
+        types::usize maxPhysicsSceneCount = 16;
+        types::usize maxPhysicsMaterialCount = 256;
+        types::usize maxPhysicsActorCount = 8192;
+        types::usize maxPhysicsControllerCount = 8;
+        types::usize maxSoundCount = 65536;
+    };
+
     class iApplication : public iObject
     {
         HARPY_OBJECT(iApplication)
@@ -69,44 +66,18 @@ namespace harpy
             MIDDLE
         };
 
-        explicit iApplication(cContext* context, const sEngineCapabilities* capabilities);
+        explicit iApplication(cContext* context, const sApplicationCapabilities* caps);
         ~iApplication();
 
         virtual void Setup() = 0;
         virtual void Stop() = 0;
 
+        inline const sApplicationCapabilities* GetCapabilities() const { return _caps; }
         inline cEngine* GetEngine() const { return _engine; }
         inline cWindow* GetWindow() const { return _window; }
-        inline iRenderContext* GetRenderContext() const { return _renderContext; }
-        inline iSoundContext* GetSoundContext() const { return _soundContext; }
-        inline mCamera* GetCameraManager() const { return _camera; }
-        inline mTexture* GetTextureManager() const { return _texture; }
-        inline mRender* GetRenderManager() const { return _render; }
-        inline mFont* GetFontManager() const { return _font; }
-        inline mSound* GetSoundManager() const { return _sound; }
-        inline mFileSystem* GetFileSystemManager() const { return _fileSystem; }
-        inline mPhysics* GetPhysicsManager() const { return _physics; }
-        inline mGameObject* GetGameObjectManager() const { return _gameObject; }
-        inline mEvent* GetEventManager() const { return _event; }
-        inline mThread* GetThreadManager() const { return _thread; }
 
     protected:
-        iRenderContext* _renderContext = nullptr;
-        iSoundContext* _soundContext = nullptr;
-        mCamera* _camera = nullptr;
-        mRender* _render = nullptr;
-        mTexture* _texture = nullptr;
-        mFont* _font = nullptr;
-        mSound* _sound = nullptr;
-        mFileSystem* _fileSystem = nullptr;
-        mPhysics* _physics = nullptr;
-        mGameObject* _gameObject = nullptr;
-        mEvent* _event = nullptr;
-        mThread* _thread = nullptr;
-        types::f32 _deltaTime = 0.0;
-        std::chrono::steady_clock::time_point _timepointLast;
-        types::boolean _isFocused = types::K_FALSE;
-        glm::vec2 _cursorPosition = glm::vec2(0.0f);
+        const sApplicationCapabilities* _caps = nullptr;
         cEngine* _engine = nullptr;
         cWindow* _window = nullptr;
     };

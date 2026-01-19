@@ -28,7 +28,7 @@ namespace harpy
 
     void cDataFile::Open(const std::string& path, types::boolean isText)
     {
-        const sEngineCapabilities* caps = _context->GetSubsystem<cEngine>()->GetCapabilities();
+        const sApplicationCapabilities* caps = _context->GetSubsystem<cEngine>()->GetApplication()->GetCapabilities();
         auto memoryAllocator = _context->GetMemoryAllocator();
 
         if (_data)

@@ -1,6 +1,7 @@
 // audio.cpp
 
 #include <fstream>
+#include "application.hpp"
 #include "audio.hpp"
 #include "context.hpp"
 #include "sound_context.hpp"
@@ -13,7 +14,7 @@ namespace harpy
 {
 	cSound::cSound(cContext* context, eFormat format, const std::string& path) : iObject(context), _audioBackend(context->GetSubsystem<cAudio>()->GetAPI())
 	{
-		const sEngineCapabilities* caps = _context->GetSubsystem<cEngine>()->GetCapabilities();
+		const sApplicationCapabilities* caps = _context->GetSubsystem<cEngine>()->GetApplication()->GetCapabilities();
 		cMemoryAllocator* memoryAllocator = _context->GetMemoryAllocator();
 
 		sWAVStructure wav = {};
@@ -83,8 +84,8 @@ namespace harpy
 
 	cAudio::cAudio(cContext* context) : iObject(context)
 	{
-		const sEngineCapabilities* capabilities = context->GetSubsystem<cEngine>()->GetCapabilities();
-		_sounds = _context->Create<cIdVector<cSound>>(_context, capabilities->maxSoundCount);
+		const sApplicationCapabilities* caps = context->GetSubsystem<cEngine>()->GetApplication()->GetCapabilities();
+		_sounds = _context->Create<cIdVector<cSound>>(_context, caps->maxSoundCount);
 	}
 
 	cAudio::~cAudio()

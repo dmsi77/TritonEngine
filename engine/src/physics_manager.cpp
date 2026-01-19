@@ -41,11 +41,11 @@ namespace harpy
         _cpuDispatcher(new cPhysicsCPUDispatcher()),
         _simulationEvent(new cPhysicsSimulationEvent())
     {
-        const sEngineCapabilities* capabilities = context->GetSubsystem<cEngine>()->GetCapabilities();
-        _scenes = _context->Create<cIdVector<cPhysicsScene>>(context, capabilities->_maxPhysicsSceneCount);
-        _materials = _context->Create<cIdVector<cPhysicsMaterial>>(context, capabilities->_maxPhysicsMaterialCount);
-        _actors = _context->Create<cIdVector<cPhysicsActor>>(context, capabilities->_maxPhysicsActorCount);
-        _controllers = _context->Create<cIdVector<cPhysicsController>>(context, capabilities->_maxPhysicsControllerCount);
+        const sApplicationCapabilities* caps = context->GetSubsystem<cEngine>()->GetApplication()->GetCapabilities();
+        _scenes = _context->Create<cIdVector<cPhysicsScene>>(context, caps->maxPhysicsSceneCount);
+        _materials = _context->Create<cIdVector<cPhysicsMaterial>>(context, caps->maxPhysicsMaterialCount);
+        _actors = _context->Create<cIdVector<cPhysicsActor>>(context, caps->maxPhysicsActorCount);
+        _controllers = _context->Create<cIdVector<cPhysicsController>>(context, caps->maxPhysicsControllerCount);
 
         _foundation = PxCreateFoundation(PX_PHYSICS_VERSION, *_allocator, *_error);
         if (_foundation == nullptr)

@@ -9,38 +9,23 @@
 namespace harpy
 {
 	class cContext;
+	struct sApplicationCapabilities;
 	class iApplication;
-
-	struct sEngineCapabilities
-	{
-		std::string windowTitle = "Test app";
-		types::usize windowWidth = 640;
-		types::usize windowHeight = 480;
-		types::boolean fullscreen = types::K_FALSE;
-		types::usize memoryAlignment = 64;
-		types::usize maxPhysicsSceneCount = 16;
-		types::usize maxPhysicsMaterialCount = 256;
-		types::usize maxPhysicsActorCount = 8192;
-		types::usize maxPhysicsControllerCount = 8;
-		types::usize maxSoundCount = 65536;
-	};
 
 	class cEngine : public iObject
 	{
 		HARPY_OBJECT(cEngine)
 
 	public:
-		explicit cEngine(cContext* context, const sEngineCapabilities* capabilities, iApplication* app);
+		explicit cEngine(cContext* context, iApplication* app);
 		virtual ~cEngine() override final = default;
 
 		void Initialize();
 		void Run();
 
-		inline const sEngineCapabilities* GetCapabilities() const { return _capabilities; }
 		inline iApplication* GetApplication() const { return _app; }
 
 	private:
-		const sEngineCapabilities* _capabilities = nullptr;
 		iApplication* _app = nullptr;
 	};
 }

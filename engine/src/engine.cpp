@@ -21,7 +21,7 @@ using namespace types;
 
 namespace harpy
 {
-	cEngine::cEngine(cContext* context, const sEngineCapabilities* capabilities, iApplication* app) : iObject(context), _capabilities(capabilities), _app(app) {}
+	cEngine::cEngine(cContext* context, iApplication* app) : iObject(context), _app(app) {}
 
 	void cEngine::Initialize()
 	{

@@ -42,7 +42,7 @@ namespace harpy
 			return nullptr;
 		}
 		
-		const sEngineCapabilities* caps = _context->GetSubsystem<cEngine>()->GetCapabilities();
+		const sApplicationCapabilities* caps = _context->GetSubsystem<cEngine>()->GetApplication()->GetCapabilities();
 		cMemoryAllocator* memoryAllocator = _context->GetMemoryAllocator();
 
 		const types::usize objectByteSize = sizeof(T);
