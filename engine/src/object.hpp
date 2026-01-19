@@ -56,6 +56,7 @@ namespace harpy
 		void Send(eEventType type, cDataBuffer* data);
 
 		inline cContext* GetContext() const { return _context; }
+		inline const cIdentifier::ID& GetID() const { return _identifier->GetID(); }
 		inline cIdentifier* GetIdentifier() const { return _identifier; }
 
 	protected:
