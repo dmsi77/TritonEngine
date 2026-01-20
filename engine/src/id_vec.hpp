@@ -97,7 +97,7 @@ namespace triton
 		for (types::usize i = 0; i < _indexCount; i++)
 		{
 			const types::s32 index = _indices[i];
-			if (_elements[index].GetIdentifier().GetID() == id)
+			if (_elements[index].GetIdentifier()->GetID() == id)
 				return (T*)&_elements[index];
 		}
 
