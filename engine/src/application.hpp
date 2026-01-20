@@ -22,7 +22,11 @@ namespace triton
 
     public:
         explicit cWindow(cContext* context, const std::string& title, types::usize width, types::usize height, types::boolean fullscreen);
-        virtual ~cWindow() override final = default;
+        virtual ~cWindow() override final;
+
+        void Resize(const glm::vec2& size);
+        void SwapBuffers();
+        void PollEvents();
 
         types::boolean GetRunState() const;
         HWND GetWin32Window() const;

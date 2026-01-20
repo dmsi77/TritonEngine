@@ -83,8 +83,8 @@ namespace triton
 			physics->Simulate();
 			camera->Update();
 			gfx->CompositeFinal();
-			input->SwapBuffers();
-			input->PollEvents();
+			window->SwapBuffers();
+			window->PollEvents();
 		}
 
 		time->EndFrame();

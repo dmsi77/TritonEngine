@@ -3,6 +3,8 @@
 #include <windows.h>
 #include <GLFW/glfw3.h>
 #include "input.hpp"
+#include "application.hpp"
+#include "engine.hpp"
 #include "context.hpp"
 #include "graphics.hpp"
 
@@ -43,11 +45,10 @@ namespace triton
     void WindowSizeCallback(GLFWwindow* window, int width, int height)
     {
         cContext* context = (cContext*)glfwGetWindowUserPointer(window);
-        cInput* input = context->GetSubsystem<cInput>();
+        cWindow* appWindow = context->GetSubsystem<cEngine>()->GetApplication()->GetWindow();
         cGraphics* gfx = context->GetSubsystem<cGraphics>();
 
-        input->_window->_width = width;
-        input->_window->_height = height;
+        appWindow->Resize(glm::vec2(width, height));
 
         gfx->ResizeRenderTargets(glm::vec2(width, height));
     }
@@ -84,16 +85,6 @@ namespace triton
             glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         }
     }
-
-    void cInput::SwapBuffers()
-    {
-        glfwSwapBuffers(_window->GetWindow());
-    }
-
-	void cInput::PollEvents()
-	{
-		glfwPollEvents();
-	}
 
     glm::vec2 cInput::GetMonitorSize() const
     {

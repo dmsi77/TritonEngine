@@ -29,7 +29,8 @@ using namespace types;
 
 namespace triton
 {
-    cWindow::cWindow(cContext* context, const std::string& title, types::usize width, types::usize height, types::boolean fullscreen) : iObject(context), _title(title), _fullscreen(fullscreen)
+    cWindow::cWindow(cContext* context, const std::string& title, types::usize width, types::usize height, types::boolean fullscreen)
+        : iObject(context), _title(title), _fullscreen(fullscreen)
     {
         cInput* input = context->GetSubsystem<cInput>();
 
@@ -71,6 +72,27 @@ namespace triton
         glfwSetWindowSizeCallback(_window, &WindowSizeCallback);
         glfwSetCursorPosCallback(_window, &CursorCallback);
         glfwSetMouseButtonCallback(_window, &MouseButtonCallback);
+    }
+
+    cWindow::~cWindow()
+    {
+        glfwDestroyWindow(_window);
+    }
+
+    void cWindow::Resize(const glm::vec2& size)
+    {
+        _width = size.x;
+        _height = size.y;
+    }
+
+    void cWindow::SwapBuffers()
+    {
+        glfwSwapBuffers(_window);
+    }
+
+    void cWindow::PollEvents()
+    {
+        glfwPollEvents();
     }
 
     types::boolean cWindow::GetRunState() const

@@ -29,9 +29,6 @@ namespace triton
 		explicit cInput(cContext* context);
 		virtual ~cInput() override final = default;
 
-        void SwapBuffers();
-		void PollEvents();
-
         glm::vec2 GetMonitorSize() const;
         inline types::boolean GetKey(int key) const { return _keys[key]; }
         inline types::boolean GetMouseKey(int key) const { return _mouseKeys[key]; }
