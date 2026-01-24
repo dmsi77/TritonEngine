@@ -134,6 +134,14 @@ namespace triton
 		return cMatrix4(_mat * mat);
 	}
 
+	void cTransform::Transform()
+	{
+		const glm::quat quatX = glm::angleAxis(_rotation.GetX(), glm::vec3(1.0f, 0.0f, 0.0f));
+		const glm::quat quatY = glm::angleAxis(_rotation.GetY(), glm::vec3(0.0f, 1.0f, 0.0f));
+		const glm::quat quatZ = glm::angleAxis(_rotation.GetZ(), glm::vec3(0.0f, 0.0f, 1.0f));
+		_world = glm::translate(glm::mat4(1.0f), glm::vec3(_position.GetX(), _position.GetY(), _position.GetZ())) * glm::toMat4(quatZ * quatY * quatX) * glm::scale(glm::mat4(1.0f), glm::vec3(_scale.GetX(), _scale.GetY(), _scale.GetZ()));
+	}
+
 	cMath::cMath(cContext* context) : iObject(context) {}
 
 	f32 cMath::DegreesToRadians(f32 degrees)

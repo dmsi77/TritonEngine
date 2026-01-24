@@ -86,13 +86,6 @@ namespace triton
 		glm::quat _quat = {};
 	};
 
-	struct sTransform
-	{
-		cVector3 position;
-		cVector3 rotation;
-		cVector3 scale;
-	};
-
 	class cMatrix4
 	{
 	public:
@@ -106,6 +99,29 @@ namespace triton
 
 	private:
 		glm::mat4 _mat = {};
+	};
+
+	class cTransform
+	{
+	public:
+		explicit cTransform() = default;
+		~cTransform() = default;
+
+		void Transform();
+
+		inline cVector3& GetPosition() const { return _position; }
+		inline cVector3& GetRotation() const { return _rotation; }
+		inline cVector3& GetScale() const { return _scale; }
+		inline cMatrix4& GetWorld() const { return _world; }
+		inline void SetPosition(const cVector3& position) { _position = position; }
+		inline void SetRotation(const cVector3& rotation) { _rotation = rotation; }
+		inline void SetScale(const cVector3& scale) { _scale = scale; }
+
+	private:
+		mutable cVector3 _position = cVector3(0.0f);
+		mutable cVector3 _rotation = cVector3(0.0f);
+		mutable cVector3 _scale = cVector3(0.0f);
+		mutable cMatrix4 _world = cMatrix4(1.0f);
 	};
 
 	class cMath : public iObject
