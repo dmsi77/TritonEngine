@@ -23,6 +23,10 @@ namespace triton
 		cVector2 operator-(const cVector2& vec) const;
 		cVector2 operator*(const cVector2& vec) const;
 		cVector2 operator/(const cVector2& vec) const;
+		cVector2 operator+(types::f32 val) const;
+		cVector2 operator-(types::f32 val) const;
+		cVector2 operator*(types::f32 val) const;
+		cVector2 operator/(types::f32 val) const;
 
 		inline types::f32 GetX() const { return _vec.x; }
 		inline types::f32 GetY() const { return _vec.y; }
@@ -47,6 +51,12 @@ namespace triton
 		cVector3 operator-(const cVector3& vec) const;
 		cVector3 operator*(const cVector3& vec) const;
 		cVector3 operator/(const cVector3& vec) const;
+		cVector3 operator+(types::f32 val) const;
+		cVector3 operator-(types::f32 val) const;
+		cVector3 operator*(types::f32 val) const;
+		cVector3 operator/(types::f32 val) const;
+
+		cVector3 Cross(const cVector3& axis);
 
 		inline types::f32 GetX() const { return _vec.x; }
 		inline types::f32 GetY() const { return _vec.y; }
@@ -74,6 +84,13 @@ namespace triton
 
 	private:
 		glm::quat _quat = {};
+	};
+
+	struct sTransform
+	{
+		cVector3 position;
+		cVector3 rotation;
+		cVector3 scale;
 	};
 
 	class cMatrix4

@@ -32,6 +32,26 @@ namespace triton
 		return cVector2(_vec / vec);
 	}
 
+	cVector2 cVector2::operator+(f32 val) const
+	{
+		return cVector2(_vec + val);
+	}
+
+	cVector2 cVector2::operator-(f32 val) const
+	{
+		return cVector2(_vec - val);
+	}
+
+	cVector2 cVector2::operator*(f32 val) const
+	{
+		return cVector2(_vec * val);
+	}
+
+	cVector2 cVector2::operator/(f32 val) const
+	{
+		return cVector2(_vec / val);
+	}
+
 	cVector3::cVector3(const glm::vec3& vec) : _vec(vec) {}
 
 	cVector3::cVector3(f32 value) : _vec(glm::vec3(value, value, value)) {}
@@ -56,6 +76,33 @@ namespace triton
 	cVector3 cVector3::operator/(const cVector3& vec) const
 	{
 		return cVector3(_vec / vec);
+	}
+
+	cVector3 cVector3::operator+(f32 val) const
+	{
+		return cVector3(_vec + val);
+	}
+
+	cVector3 cVector3::operator-(f32 val) const
+	{
+		return cVector3(_vec - val);
+	}
+
+	cVector3 cVector3::operator*(f32 val) const
+	{
+		return cVector3(_vec * val);
+	}
+
+	cVector3 cVector3::operator/(f32 val) const
+	{
+		return cVector3(_vec / val);
+	}
+
+	cVector3 cVector3::Cross(const cVector3& axis)
+	{
+		_vec = glm::cross(_vec, glm::vec3(axis.GetX(), axis.GetY(), axis.GetZ()));
+
+		return cVector3(_vec);
 	}
 
 	cQuaternion::cQuaternion(const glm::quat& quat) : _quat(quat) {}
