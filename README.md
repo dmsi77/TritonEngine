@@ -8,8 +8,8 @@ Inspired by Urho3D, Wicked Engine, HPL1 Engine, UE4.
 - Disk file IO
 - TrueType fonts
 - Memory allocator (UE4-like)
-- Thread pool
-- Event subscription/sending system
+- Multithreading (thread pool)
+- Event subscription/sending
 - PhysX 5.3 physics
 - Assimp model loading
 - OpenGL 4.3 rendering backend
