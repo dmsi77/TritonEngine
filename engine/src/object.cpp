@@ -8,13 +8,17 @@ using namespace types;
 
 namespace triton
 {
-	cIdentifier::cIdentifier(const std::string& id) : _id(id) {}
+    cIdentifier::cIdentifier(usize& counter, const std::string& typeName)
+    {
+        const std::string& strID = typeName + std::to_string(counter++);
+        memcpy(&_id[0], &strID.c_str()[0], kMaxIDStringByteSize);
+    }
 
-    cIdentifier* cIdentifier::GenerateIdentifier(const std::string& type)
+    cIdentifier cIdentifier::Generate(const std::string& seed)
     {
         static usize counter = 0;
 
-        return new cIdentifier(type + std::to_string(counter++));
+        return cIdentifier(counter, seed);
     }
 
     iObject::~iObject()

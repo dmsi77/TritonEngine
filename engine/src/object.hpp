@@ -3,6 +3,7 @@
 #pragma once
 
 #include <string>
+#include <array>
 #include "log.hpp"
 #include "event_types.hpp"
 #include "memory_pool.hpp"
@@ -24,18 +25,29 @@ namespace triton
 	class cIdentifier
 	{
 	public:
-		using ID = std::string;
+		static constexpr types::usize kMaxIDStringByteSize = 32;
+		using ID = std::array<types::u8, kMaxIDStringByteSize>;
 
 	public:
-		cIdentifier(const std::string& id);
+		explicit cIdentifier() = default;
 		~cIdentifier() = default;
 
-		static cIdentifier* GenerateIdentifier(const std::string& type);
+		static cIdentifier Generate(const std::string& seed);
 
 		inline const ID& GetID() const { return _id; }
 
 	private:
-		ID _id = "";
+		explicit cIdentifier(types::usize& counter, const std::string& typeName);
+
+	private:
+		ID _id = {};
+	};
+
+	class iObject;
+	class cObjectPtr
+	{
+	public:
+		iObject* object = nullptr;
 	};
 
 	class iObject
