@@ -31,7 +31,7 @@ namespace triton
             _listeners.insert({ type, std::make_shared<cCache<cEventHandler>>(_context, caps->maxEventPerTypeCount) });
         }
 
-        _listeners[type]->Add(receiver->GetID(), _context, receiver, type, std::move(function));
+        _listeners[type]->Create(receiver->GetID(), _context, receiver, type, std::move(function));
     }
 
     void cEventDispatcher::Unsubscribe(iObject* receiver, eEventType type)
@@ -40,13 +40,12 @@ namespace triton
             return;
 
         auto& events = _listeners[type];
-        const cEventHandler* elements = events->GetElements();
         for (usize i = 0; i < events->GetElementCount(); i++)
         {
-            const iObject* listenerReceiver = elements[i].GetReceiver();
+            const iObject* listenerReceiver = events->GetElement(i);
             if (listenerReceiver == receiver)
             {
-                events->Delete(listenerReceiver->GetID());
+                events->Destroy(listenerReceiver->GetID());
 
                 return;
             }
@@ -66,8 +65,7 @@ namespace triton
             return;
 
         auto& events = _listeners[type];
-        cEventHandler* elements = events->GetElements();
         for (usize i = 0; i < events->GetElementCount(); i++)
-            elements[i].Invoke(data);
+            events->GetElement(i)->Invoke(data);
     }
 }
