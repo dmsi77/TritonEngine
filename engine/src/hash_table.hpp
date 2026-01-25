@@ -34,6 +34,9 @@ namespace triton
 		T* Find(const std::string& key);
 		void Erase(const std::string& key);
 
+		inline const T* GetElement(types::u32 index) const;
+		inline types::usize GetElementCount() const { return _elementCount; }
+
 	private:
 		types::u32 AllocateChunk();
 		void DeallocateChunk(types::u32 chunkIndex);
@@ -159,6 +162,22 @@ namespace triton
 				}
 			}
 		}
+	}
+
+	template <typename T>
+	const T* cHashTable<T>::GetElement(types::u32 index) const
+	{
+		const types::u32 chunkIndex = GetChunkIndex(index);
+
+		if (chunkIndex >= _chunkCount)
+			return nullptr;
+
+		const types::usize chunkObjectCount = GetChunkLocalPosition(info.chunk, _elementCount);
+		const types::u32 localPosition = GetChunkLocalPosition(chunkIndex, index);
+		if (localPosition >= chunkObjectCount)
+			return nullptr;
+
+		return _chunks[chunkIndex][localPosition];
 	}
 
 	template <typename T>
