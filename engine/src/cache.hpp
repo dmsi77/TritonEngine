@@ -22,8 +22,8 @@ namespace triton
 
 		template <typename... Args>
 		cCacheObject<T> Create(Args&&... args);
-		cCacheObject<T> Find(const types::u8* idStr);
-		void Destroy(const types::u8* idStr);
+		cCacheObject<T> Find(const cTag& idStr);
+		void Destroy(const cTag& idStr);
 
 		inline T* GetElement(types::u32 index) const { return _objects->GetElement(index); }
 		inline types::usize GetElementCount() const { return _objects->GetElementCount(); }
@@ -49,13 +49,13 @@ namespace triton
 	}
 
 	template <typename T>
-	cCacheObject<T> cCache<T>::Find(const types::u8* idStr)
+	cCacheObject<T> cCache<T>::Find(const cTag& idStr)
 	{
 		return _objects->Find(id);
 	}
 
 	template <typename T>
-	void cCache<T>::Destroy(const types::u8* idStr)
+	void cCache<T>::Destroy(const cTag& idStr)
 	{
 		_objects->Erase(id);
 	}
